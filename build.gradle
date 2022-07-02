@@ -3,6 +3,7 @@ plugins {
     id 'java'
     id 'java-library'
     id 'idea'
+    id "org.sonarqube" version '3.4.0.2513'
     id 'jacoco'
     id "application"
     id "com.github.spotbugs" version '5.0.8'
@@ -19,6 +20,16 @@ spotbugsMain {
         html {
             stylesheet = 'fancy-hist.xsl'
         }
+    }
+}
+
+sonarqube {
+    properties {
+        property "sonar.projectKey", "ak-git_SimpleSpringApp"
+        property "sonar.organization", "ak-git"
+        property "sonar.host.url", "https://sonarcloud.io"
+        property "sonar.branch.name", "master"
+        property 'sonar.coverage.jacoco.xmlReportPaths', 'build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml'
     }
 }
 

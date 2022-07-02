@@ -1,0 +1,5 @@
+version: "3.9"
+services:
+  simple-app:
+    container_name: simple-app
+    image: a002k/simple-app:latest

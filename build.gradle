@@ -1,0 +1,101 @@
+plugins {
+    id "org.javamodularity.moduleplugin" version '1.8.11'
+    id 'java'
+    id 'java-library'
+    id 'idea'
+    id "org.sonarqube" version '3.4.0.2513'
+    id 'jacoco'
+    id "application"
+    id "com.github.spotbugs" version '5.0.8'
+}
+
+spotbugs {
+    reportLevel = 'high'
+}
+
+spotbugsMain {
+    reports {
+        html {
+            stylesheet = 'fancy-hist.xsl'
+        }
+    }
+}
+
+sonarqube {
+    properties {
+        property "sonar.projectKey", "ak-git_SimpleApp"
+        property "sonar.organization", "ak-git"
+        property "sonar.host.url", "https://sonarcloud.io"
+        property "sonar.branch.name", "master"
+        property 'sonar.coverage.jacoco.xmlReportPaths', 'build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml'
+    }
+}
+
+jacoco {
+    toolVersion = "0.8.8"
+}
+
+ext {
+    testNG = 'org.testng:testng:7.6.0'
+    jsr305 = 'com.google.code.findbugs:jsr305:3.0.2'
+    javaVersion = JavaVersion.VERSION_18
+}
+
+wrapper {
+    description 'Setup the Gradle wrapper'
+    gradleVersion = "7.4.2"
+    distributionUrl = "https://services.gradle.org/distributions/gradle-${gradleVersion}-all.zip"
+}
+
+allprojects {
+    group = 'com.ak'
+    version = '2022.06.25'
+    apply plugin: 'idea'
+    idea {
+        module {
+            inheritOutputDirs = true
+        }
+    }
+
+    sourceSets {
+        main.output.resourcesDir = main.java.classesDirectory
+    }
+
+    apply plugin: 'java'
+    apply plugin: 'java-library'
+    apply plugin: 'org.javamodularity.moduleplugin'
+    apply plugin: 'jacoco'
+
+    sourceCompatibility = javaVersion
+    targetCompatibility = javaVersion
+
+    repositories {
+        mavenCentral()
+        mavenLocal()
+        maven {
+            url = 'https://plugins.gradle.org/m2/'
+        }
+    }
+
+    jacocoTestReport {
+        reports {
+            xml.enabled true
+        }
+    }
+
+    dependencies {
+        implementation jsr305
+        implementation testNG
+    }
+
+    test {
+        forkEvery = 5
+        useTestNG()
+        maxHeapSize = '1G'
+    }
+}
+
+application {
+    mainModule = 'com.ak.app'
+    mainClass = 'com.ak.app.MainApp'
+}

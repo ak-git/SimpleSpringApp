@@ -1,0 +1,43 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-java@v3
+        with:
+          distribution: corretto
+          java-version: 18
+      - name: Cache SonarCloud packages
+        uses: actions/cache@v1
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+      - name: Cache Gradle packages
+        uses: actions/cache@v1
+        with:
+          path: ~/.gradle/caches
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
+          restore-keys: ${{ runner.os }}-gradle
+      - name: Build and analyze
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: gradle build jacocoTestReport sonarqube --info
+      - name: Set current date as env variable
+        run: echo "RELEASE_DATE=$(date +%s)" >> $GITHUB_ENV
+      - name: Echo current date
+        run: echo ${{ env.RELEASE_DATE }}
+      - name: Login to Docker Hub
+        run: docker login -u a002k -p ${{ secrets.DOCKER_PASSWORD }}
+      - name: Build the Docker image
+        run: docker build -t a002k/simple-app:${{ env.RELEASE_DATE }} -t a002k/simple-app:latest .
+      - name: Push the Docker image
+        run: docker push a002k/simple-app --all-tags

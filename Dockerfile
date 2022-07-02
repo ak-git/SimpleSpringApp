@@ -4,10 +4,10 @@ FROM openjdk:latest
 RUN mkdir /app
 
 # Copy the app files from host machine to image filesystem
-COPY build/classes/java/main /app
+COPY build/libs /app
 
 # Set the directory for executing future commands
 WORKDIR /app
 
 # Run the Main class
-CMD java com.ak.spring.Application
+CMD java -jar SimpleSpringApp-2022.07.02.jar

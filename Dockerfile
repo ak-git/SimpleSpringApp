@@ -10,4 +10,4 @@ COPY build/classes/java/main /app
 WORKDIR /app
 
 # Run the Main class
-CMD java com.ak.app.MainApp
+CMD java com.ak.spring.Application

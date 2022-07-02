@@ -1,7 +1,11 @@
-module com.ak.app {
+module com.ak.spring {
   requires java.logging;
-  requires jsr305;
+  requires spring.boot;
+  requires spring.boot.autoconfigure;
+  requires spring.context;
+  requires spring.core;
+  requires spring.beans;
 
-  opens com.ak.app to org.testng;
-  exports com.ak.app;
+  opens com.ak.spring to spring.core, org.junit.jupiter;
+  exports com.ak.spring;
 }

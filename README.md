@@ -1,16 +1,16 @@
-# Simple Java App with Docker support
+# Simple SpringBoot App with Docker support
 
 ## Build docker image
 
-`docker build -t a002k/simple-app:latest .`
+`docker build -t a002k/simple-spring-app:latest .`
 
 ## Run docker image
 
-`docker run --rm a002k/simple-app`
+`docker run --rm a002k/simple-spring-app`
 
 ## Run docker image as docker-compose
 
-`docker-compose run --rm simple-app`
+`docker-compose run --rm simple-spring-app`
 
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=ak-git_SimpleApp&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=ak-git_SimpleApp)
 [![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=ak-git_SimpleApp&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=ak-git_SimpleApp)

@@ -38,6 +38,6 @@ jobs:
       - name: Login to Docker Hub
         run: docker login -u a002k -p ${{ secrets.DOCKER_PASSWORD }}
       - name: Build the Docker image
-        run: docker build -t a002k/simple-app:${{ env.RELEASE_DATE }} -t a002k/simple-app:latest .
+        run: docker build -t a002k/simple-spring-app:${{ env.RELEASE_DATE }} -t a002k/simple-spring-app:latest .
       - name: Push the Docker image
-        run: docker push a002k/simple-app --all-tags
+        run: docker push a002k/simple-spring-app --all-tags

@@ -3,10 +3,11 @@ plugins {
     id 'java'
     id 'java-library'
     id 'idea'
-    id "org.sonarqube" version '3.4.0.2513'
     id 'jacoco'
     id "application"
     id "com.github.spotbugs" version '5.0.8'
+    id 'org.springframework.boot' version '2.7.1'
+    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
 }
 
 spotbugs {
@@ -21,23 +22,11 @@ spotbugsMain {
     }
 }
 
-sonarqube {
-    properties {
-        property "sonar.projectKey", "ak-git_SimpleApp"
-        property "sonar.organization", "ak-git"
-        property "sonar.host.url", "https://sonarcloud.io"
-        property "sonar.branch.name", "master"
-        property 'sonar.coverage.jacoco.xmlReportPaths', 'build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml'
-    }
-}
-
 jacoco {
     toolVersion = "0.8.8"
 }
 
 ext {
-    testNG = 'org.testng:testng:7.6.0'
-    jsr305 = 'com.google.code.findbugs:jsr305:3.0.2'
     javaVersion = JavaVersion.VERSION_18
 }
 
@@ -49,7 +38,7 @@ wrapper {
 
 allprojects {
     group = 'com.ak'
-    version = '2022.06.25'
+    version = '2022.07.02'
     apply plugin: 'idea'
     idea {
         module {
@@ -84,18 +73,24 @@ allprojects {
     }
 
     dependencies {
-        implementation jsr305
-        implementation testNG
+        implementation 'org.springframework.boot:spring-boot-starter'
+        testImplementation 'org.springframework.boot:spring-boot-starter-test'
     }
 
     test {
         forkEvery = 5
-        useTestNG()
+        useJUnitPlatform()
         maxHeapSize = '1G'
     }
 }
 
+configurations {
+    all {
+        exclude group: 'com.vaadin.external.google', module: 'android-json'
+    }
+}
+
 application {
-    mainModule = 'com.ak.app'
-    mainClass = 'com.ak.app.MainApp'
+    mainModule = 'com.ak.spring'
+    mainClass = 'com.ak.spring.Application'
 }

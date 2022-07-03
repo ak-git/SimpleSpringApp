@@ -5,7 +5,8 @@ module com.ak.spring {
   requires spring.context;
   requires spring.core;
   requires spring.beans;
+  requires spring.web;
 
-  opens com.ak.spring to spring.core, org.junit.jupiter;
+  opens com.ak.spring to spring.core;
   exports com.ak.spring;
 }

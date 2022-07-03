@@ -16,7 +16,7 @@
 
 `$ curl localhost:8080`
 
-## You can check the health of the application by running the following command:
+## You can check the health of the application by running the following command
 
 `$ curl localhost:8080/actuator/health`
 

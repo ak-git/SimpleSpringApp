@@ -15,5 +15,15 @@ class ApplicationTests {
   void contextLoads() {
     Assertions.assertNotNull(commandLineRunner);
   }
+
+  @Test
+  void testMain() {
+    try {
+      Application.main(new String[] {});
+    }
+    catch (Exception ex) {
+      Assertions.fail(ex);
+    }
+  }
 }
 

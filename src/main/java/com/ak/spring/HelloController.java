@@ -2,6 +2,7 @@ package com.ak.spring;
 
 import java.util.logging.Logger;
 
+import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class HelloController {
 
   @GetMapping("/")
+  @NonNull
   public String index() {
     String time = Long.toString(System.nanoTime());
     Logger.getLogger(getClass().getName()).info(() -> time);

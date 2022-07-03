@@ -4,11 +4,11 @@
 
 `docker build -t a002k/simple-spring-app:latest .`
 
-## Run docker image
+## Run docker image at http://localhost:8080/
 
-`docker run --rm a002k/simple-spring-app`
+`docker run --rm -p 8080:8080 a002k/simple-spring-app`
 
-## Run docker image as docker-compose
+## Run docker image as docker-compose at http://localhost:8080/
 
 `docker-compose run --rm simple-spring-app`
 

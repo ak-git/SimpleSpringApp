@@ -1,5 +1,6 @@
 package com.ak.spring;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -21,8 +22,10 @@ class HelloControllerTest {
 
   @Test
   void getHello() throws Exception {
-    mvc.perform(MockMvcRequestBuilders.get("/").accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk())
-        .andExpect(content().string(startsWith("Greetings from Spring Boot")));
+    Assertions.assertNotNull(
+        mvc.perform(MockMvcRequestBuilders.get("/").accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(content().string(startsWith("Greetings from Spring Boot")))
+    );
   }
 }

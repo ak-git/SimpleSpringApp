@@ -1,4 +1,4 @@
-FROM openjdk:latest
+FROM openjdk
 
 # Create a new app directory for my application files
 RUN mkdir /app

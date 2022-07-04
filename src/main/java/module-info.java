@@ -7,6 +7,6 @@ module com.ak.spring {
   requires spring.beans;
   requires spring.web;
 
-  opens com.ak.spring to spring.core;
+  opens com.ak.spring to spring.core, com.fasterxml.jackson.databind;
   exports com.ak.spring;
 }

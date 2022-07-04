@@ -15,8 +15,14 @@ class HelloControllerIntegrationTest {
   private TestRestTemplate template;
 
   @Test
-  void getHello() {
+  void index() {
     ResponseEntity<String> response = template.getForEntity("/", String.class);
-    assertThat(response.getBody()).startsWith("Greetings from Spring Boot");
+    assertThat(response.getBody()).startsWith("Greetings from Spring Boot").endsWith("!");
+  }
+
+  @Test
+  void greeting() {
+    Greeting response = template.getForObject("/greeting/", Greeting.class);
+    assertThat(response).matches(greeting -> greeting.id() > 0).matches(greeting -> greeting.content().equals("Hello, World!"));
   }
 }

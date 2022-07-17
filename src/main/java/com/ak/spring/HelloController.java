@@ -23,6 +23,8 @@ public class HelloController {
   @GetMapping("/greeting")
   @NonNull
   public Greeting greeting(@RequestParam(value = "name", defaultValue = "World") @NonNull String name) {
-    return new Greeting(counter.incrementAndGet(), "Hello, %s!".formatted(name));
+    Greeting greeting = new Greeting(counter.incrementAndGet(), "Hello, %s!".formatted(name));
+    Logger.getLogger(getClass().getName()).info(greeting::toString);
+    return greeting;
   }
 }

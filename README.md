@@ -12,7 +12,10 @@
 
 `docker-compose run --rm simple-spring-app`
 
-## Use
+## Use as
+[http://localhost:8080/greeting](http://localhost:8080/greeting)
+
+[http://localhost:8080/greeting?name=1](http://localhost:8080/greeting?name=1)
 
 `$ curl localhost:8080`
 

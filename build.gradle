@@ -7,7 +7,7 @@ plugins {
     id 'jacoco'
     id "application"
     id "com.github.spotbugs" version '5.0.9'
-    id 'org.springframework.boot' version '2.7.1'
+    id 'org.springframework.boot' version '2.7.2'
     id 'io.spring.dependency-management' version '1.0.12.RELEASE'
 }
 
@@ -49,7 +49,7 @@ wrapper {
 
 allprojects {
     group = 'com.ak'
-    version = '2022.07.28'
+    version = '2022.07.29'
     apply plugin: 'idea'
     idea {
         module {
@@ -86,7 +86,10 @@ allprojects {
     dependencies {
         implementation 'org.springframework.boot:spring-boot-starter-web'
         implementation 'org.springframework.boot:spring-boot-starter-actuator'
-        testImplementation 'org.springframework.boot:spring-boot-starter-test'
+        developmentOnly 'org.springframework.boot:spring-boot-devtools'
+        testImplementation('org.springframework.boot:spring-boot-starter-test') {
+            exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+        }
     }
 
     test {
@@ -102,6 +105,10 @@ allprojects {
 configurations {
     all {
         exclude group: 'com.vaadin.external.google', module: 'android-json'
+    }
+    developmentOnly
+    runtimeClasspath {
+        extendsFrom developmentOnly
     }
 }
 

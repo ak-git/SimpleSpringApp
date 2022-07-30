@@ -1,10 +1,14 @@
 package com.ak.spring.data.generator;
 
+import java.util.Locale;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import com.ak.spring.data.entity.Player;
 import com.ak.spring.data.repository.PlayerRepository;
+import com.github.javafaker.Faker;
+import com.github.javafaker.Name;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.lang.NonNull;
@@ -18,18 +22,23 @@ public class DataGenerator {
   @Bean
   public CommandLineRunner commandLineRunner(@NonNull PlayerRepository repository) {
     return args -> {
-      repository.save(new Player("Jack", "Bauer"));
-      repository.save(new Player("Chloe", "O'Brian"));
-      repository.save(new Player("Kim", "Bauer"));
-      repository.save(new Player("David", "Palmer"));
-      repository.save(new Player("Michelle", "Dessler"));
+      if (repository.count() == 0) {
+        Faker faker = new Faker(Locale.getDefault());
+        LOGGER.info(() -> "Generating demo data");
+        IntStream.range(0, 50)
+            .forEach(value -> {
+              Player entity = new Player();
+              Name name = faker.name();
+              entity.setFirstName(name.firstName());
+              entity.setSurName("");
+              entity.setLastName(name.lastName());
+              repository.save(entity);
+            });
 
-      LOGGER.info(() ->
-          "Players found with findAll(): %n %s".formatted(repository.findAll().stream().map(Player::toString)
-              .collect(Collectors.joining(NEW_LINE))));
-      LOGGER.info(() -> "Found by name 'b':%n%s".formatted(
-          repository.search("B").stream().map(Player::toString).collect(Collectors.joining(NEW_LINE)))
-      );
+        LOGGER.info(() ->
+            "Players found with findAll(): %n %s".formatted(repository.findAll().stream().map(Player::toString)
+                .collect(Collectors.joining(NEW_LINE))));
+      }
     };
   }
 }

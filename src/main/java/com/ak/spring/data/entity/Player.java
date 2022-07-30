@@ -15,19 +15,27 @@ public final class Player {
   @GeneratedValue
   @Type(type = "uuid-char")
   private UUID id;
+  @NonNull
   private String firstName = "";
+  @NonNull
+  private String surName = "";
+  @NonNull
   private String lastName = "";
 
-  public Player() {
+  public void setFirstName(@NonNull String firstName) {
+    this.firstName = firstName;
   }
 
-  public Player(@NonNull String firstName, @NonNull String lastName) {
-    this.firstName = firstName;
+  public void setSurName(@NonNull String surName) {
+    this.surName = surName;
+  }
+
+  public void setLastName(@NonNull String lastName) {
     this.lastName = lastName;
   }
 
   @Override
   public String toString() {
-    return "Player{id=%s, firstName='%s', lastName='%s'}".formatted(id, firstName, lastName);
+    return "Player{id=%s, firstName='%s', surName='%s', lastName='%s'}".formatted(id, firstName, surName, lastName);
   }
 }

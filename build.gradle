@@ -40,6 +40,7 @@ jacoco {
 ext {
     javaVersion = JavaVersion.VERSION_18
     h2 = 'com.h2database:h2:2.1.214'
+    faker = 'com.github.javafaker:javafaker:1.0.2'
 }
 
 wrapper {
@@ -50,7 +51,7 @@ wrapper {
 
 allprojects {
     group = 'com.ak'
-    version = '2022.07.29'
+    version = '2022.07.30'
     apply plugin: 'idea'
     idea {
         module {
@@ -88,6 +89,9 @@ allprojects {
         implementation 'org.springframework.boot:spring-boot-starter-web'
         implementation 'org.springframework.boot:spring-boot-starter-actuator'
         implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+        implementation(faker) {
+            exclude group: 'org.yaml', module: 'snakeyaml'
+        }
         developmentOnly 'org.springframework.boot:spring-boot-devtools'
         runtimeOnly h2
         testImplementation('org.springframework.boot:spring-boot-starter-test') {

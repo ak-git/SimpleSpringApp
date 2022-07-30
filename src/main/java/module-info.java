@@ -15,6 +15,7 @@ module com.ak.spring {
 
   opens com.ak.spring to spring.core, com.fasterxml.jackson.databind;
   opens com.ak.spring.data.entity to spring.core, org.hibernate.orm.core;
+  opens com.ak.spring.data.generator to spring.core, spring.boot.test;
   exports com.ak.spring.data.generator to spring.beans;
   exports com.ak.spring.data.repository;
   exports com.ak.spring.data.entity;

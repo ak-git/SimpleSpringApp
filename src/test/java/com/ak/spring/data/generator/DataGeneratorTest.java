@@ -19,5 +19,6 @@ class DataGeneratorTest {
   @Test
   void commandLineRunner() {
     Assertions.assertNotNull(commandLineRunner);
+    org.assertj.core.api.Assertions.assertThatNoException().isThrownBy(() -> commandLineRunner.run());
   }
 }

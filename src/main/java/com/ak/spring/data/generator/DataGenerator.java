@@ -39,6 +39,9 @@ public class DataGenerator {
             "Players found with findAll(): %n %s".formatted(repository.findAll().stream().map(Player::toString)
                 .collect(Collectors.joining(NEW_LINE))));
       }
+      else {
+        LOGGER.info(() -> "Use existing data, found %d players".formatted(repository.count()));
+      }
     };
   }
 }

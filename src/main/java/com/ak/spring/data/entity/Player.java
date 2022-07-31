@@ -17,7 +17,7 @@ public final class Player {
   @Type(type = "uuid-char")
   private UUID id;
   @NonNull
-  private ZonedDateTime time = ZonedDateTime.now();
+  private ZonedDateTime created = ZonedDateTime.now();
   @NonNull
   private String firstName = "";
   @NonNull
@@ -39,6 +39,6 @@ public final class Player {
 
   @Override
   public String toString() {
-    return "Player{id=%s, time=%s, firstName='%s', surName='%s', lastName='%s'}".formatted(id, time, firstName, surName, lastName);
+    return "Player{id=%s, created=%s, firstName='%s', surName='%s', lastName='%s'}".formatted(id, created, firstName, surName, lastName);
   }
 }

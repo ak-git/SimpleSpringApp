@@ -1,15 +1,11 @@
 package com.ak.spring.data.entity;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.util.Date;
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 
 import org.hibernate.annotations.Type;
 import org.springframework.lang.NonNull;
@@ -20,8 +16,8 @@ public final class Player {
   @GeneratedValue
   @Type(type = "uuid-char")
   private UUID id;
-  @Temporal(TemporalType.TIMESTAMP)
-  private Date time = Date.from(LocalDateTime.now().toInstant(ZoneOffset.UTC));
+  @NonNull
+  private String time = ZonedDateTime.now().toString();
   @NonNull
   private String firstName = "";
   @NonNull

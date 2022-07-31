@@ -17,7 +17,7 @@ public final class Player {
   @Type(type = "uuid-char")
   private UUID id;
   @NonNull
-  private String time = ZonedDateTime.now().toString();
+  private ZonedDateTime time = ZonedDateTime.now();
   @NonNull
   private String firstName = "";
   @NonNull

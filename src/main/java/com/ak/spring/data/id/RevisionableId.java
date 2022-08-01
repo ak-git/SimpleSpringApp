@@ -1,6 +1,7 @@
 package com.ak.spring.data.id;
 
 import java.io.Serializable;
+import java.security.SecureRandom;
 import java.util.Objects;
 import java.util.Random;
 import java.util.UUID;
@@ -10,10 +11,19 @@ import org.springframework.lang.NonNull;
 
 @Immutable
 public final class RevisionableId implements Serializable {
-  private static final Random RANDOM = new Random();
+  private static final Random RANDOM = new SecureRandom();
   @NonNull
-  private final UUID id = UUID.randomUUID();
-  private final long revision = RANDOM.nextLong();
+  private final UUID uuid;
+  private final long revision;
+
+  public RevisionableId() {
+    this(UUID.randomUUID(), RANDOM.nextLong());
+  }
+
+  public RevisionableId(@NonNull UUID uuid, long revision) {
+    this.uuid = uuid;
+    this.revision = revision;
+  }
 
   @Override
   public boolean equals(Object o) {
@@ -23,11 +33,16 @@ public final class RevisionableId implements Serializable {
     if (!(o instanceof RevisionableId that)) {
       return false;
     }
-    return revision == that.revision && id.equals(that.id);
+    return uuid.equals(that.uuid) && revision == that.revision;
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, revision);
+    return Objects.hash(uuid, revision);
+  }
+
+  @Override
+  public String toString() {
+    return "RevisionableId{uuid=%s, revision=%d}".formatted(uuid, revision);
   }
 }

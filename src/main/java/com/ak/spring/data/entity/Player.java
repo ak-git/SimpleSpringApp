@@ -20,7 +20,7 @@ public final class Player {
   @Id
   @Type(type = "uuid-char")
   @NonNull
-  private UUID id = UUID.randomUUID();
+  private UUID uuid = UUID.randomUUID();
   @Id
   @GeneratedValue(strategy = GenerationType.SEQUENCE)
   private long revision;
@@ -34,9 +34,9 @@ public final class Player {
   private String lastName = "";
 
   @NonNull
-  public Player newInstance() {
+  public Player copyInstance() {
     Player p = new Player();
-    p.id = id;
+    p.uuid = uuid;
     p.firstName = firstName;
     p.surName = surName;
     p.lastName = lastName;
@@ -63,17 +63,17 @@ public final class Player {
     if (!(o instanceof Player player)) {
       return false;
     }
-    return id.equals(player.id) && revision == player.revision && created.equals(player.created);
+    return uuid.equals(player.uuid) && revision == player.revision;
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, revision, created);
+    return Objects.hash(uuid, revision);
   }
 
   @Override
   public String toString() {
-    return "Player{id=%s, revision=%d, created=%s, firstName='%s', surName='%s', lastName='%s'}"
-        .formatted(id, revision, created, firstName, surName, lastName);
+    return "Player{uuid=%s, revision=%d, created=%s, firstName='%s', surName='%s', lastName='%s'}"
+        .formatted(uuid, revision, created, firstName, surName, lastName);
   }
 }

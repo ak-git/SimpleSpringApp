@@ -1,6 +1,8 @@
 package com.ak.spring.data.generator;
 
+import java.security.SecureRandom;
 import java.util.Locale;
+import java.util.Random;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -17,6 +19,7 @@ import org.springframework.stereotype.Service;
 public class DataGenerator {
   private static final Logger LOGGER = Logger.getLogger(DataGenerator.class.getName());
   private static final String NEW_LINE = String.format("%n");
+  private static final Random RANDOM = new SecureRandom();
 
   @Bean
   public CommandLineRunner commandLineRunner(@NonNull PlayerRepository repository) {
@@ -35,9 +38,9 @@ public class DataGenerator {
             .toList()
         );
         IntStream.range(0, 2).forEach(value ->
-            repository.findAll().stream().filter(player -> Math.random() < 0.1)
+            repository.findAll().stream().filter(player -> RANDOM.nextDouble() < 0.1)
                 .forEach(player -> {
-                  Player entity = player.newInstance();
+                  Player entity = player.copyInstance();
                   entity.setSurName(faker.funnyName().name());
                   repository.save(entity);
                 })

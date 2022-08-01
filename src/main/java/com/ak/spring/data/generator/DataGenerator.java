@@ -8,7 +8,6 @@ import java.util.stream.IntStream;
 import com.ak.spring.data.entity.Player;
 import com.ak.spring.data.repository.PlayerRepository;
 import com.github.javafaker.Faker;
-import com.github.javafaker.Name;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.lang.NonNull;
@@ -24,19 +23,27 @@ public class DataGenerator {
     return args -> {
       if (repository.count() == 0) {
         Faker faker = new Faker(Locale.getDefault());
-        LOGGER.info(() -> "Generating demo data");
-        IntStream.range(0, 50)
-            .forEach(value -> {
+        LOGGER.info(() -> "Generating players");
+        repository.saveAll(IntStream.range(0, 50)
+            .mapToObj(value -> {
               Player entity = new Player();
-              Name name = faker.name();
-              entity.setFirstName(name.firstName());
+              entity.setFirstName(faker.name().firstName());
               entity.setSurName("");
-              entity.setLastName(name.lastName());
-              repository.save(entity);
-            });
-
+              entity.setLastName(faker.name().lastName());
+              return entity;
+            })
+            .toList()
+        );
+        IntStream.range(0, 2).forEach(value ->
+            repository.findAll().stream().filter(player -> Math.random() < 0.1)
+                .forEach(player -> {
+                  Player entity = player.newInstance();
+                  entity.setSurName(faker.funnyName().name());
+                  repository.save(entity);
+                })
+        );
         LOGGER.info(() ->
-            "Players found with findAll(): %n %s".formatted(repository.findAll().stream().map(Player::toString)
+            "Players found with findAll():%n%s".formatted(repository.findAll().stream().map(Player::toString)
                 .collect(Collectors.joining(NEW_LINE))));
       }
       else {

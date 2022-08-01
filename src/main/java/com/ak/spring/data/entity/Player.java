@@ -1,21 +1,29 @@
 package com.ak.spring.data.entity;
 
 import java.time.ZonedDateTime;
+import java.util.Objects;
 import java.util.UUID;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.IdClass;
 
+import com.ak.spring.data.id.RevisionableId;
 import org.hibernate.annotations.Type;
 import org.springframework.lang.NonNull;
 
 @Entity
+@IdClass(RevisionableId.class)
 public final class Player {
   @Id
-  @GeneratedValue
   @Type(type = "uuid-char")
-  private UUID id;
+  @NonNull
+  private UUID id = UUID.randomUUID();
+  @Id
+  @GeneratedValue(strategy = GenerationType.SEQUENCE)
+  private long revision;
   @NonNull
   private ZonedDateTime created = ZonedDateTime.now();
   @NonNull
@@ -24,6 +32,16 @@ public final class Player {
   private String surName = "";
   @NonNull
   private String lastName = "";
+
+  @NonNull
+  public Player newInstance() {
+    Player p = new Player();
+    p.id = id;
+    p.firstName = firstName;
+    p.surName = surName;
+    p.lastName = lastName;
+    return p;
+  }
 
   public void setFirstName(@NonNull String firstName) {
     this.firstName = firstName;
@@ -38,7 +56,24 @@ public final class Player {
   }
 
   @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof Player player)) {
+      return false;
+    }
+    return id.equals(player.id) && revision == player.revision && created.equals(player.created);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(id, revision, created);
+  }
+
+  @Override
   public String toString() {
-    return "Player{id=%s, created=%s, firstName='%s', surName='%s', lastName='%s'}".formatted(id, created, firstName, surName, lastName);
+    return "Player{id=%s, revision=%d, created=%s, firstName='%s', surName='%s', lastName='%s'}"
+        .formatted(id, revision, created, firstName, surName, lastName);
   }
 }

@@ -33,10 +33,11 @@ class PlayerRepositoryTest {
       assertThat(players).isNotEmpty();
       Player p1 = players.get(0);
       Player p2 = players.get(1);
-      assertThat(p1).isNotEqualTo(p2).isNotEqualTo(new Object()).isEqualTo(p1);
+      Player p3 = p1.copyInstance();
+      assertThat(p1).isNotEqualTo(p2).isNotEqualTo(p3).isNotEqualTo(new Object()).isEqualTo(p1);
       assertThat(new Object()).isNotEqualTo(p1);
-      assertThat(p1).doesNotHaveSameHashCodeAs(p2).hasSameHashCodeAs(p1);
-      assertThat(p1).doesNotHaveToString(p2.toString());
+      assertThat(p1).doesNotHaveSameHashCodeAs(p2).doesNotHaveSameHashCodeAs(p3).hasSameHashCodeAs(p1);
+      assertThat(p1).doesNotHaveToString(p2.toString()).doesNotHaveToString(p3.toString());
     });
   }
 }

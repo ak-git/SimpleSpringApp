@@ -6,6 +6,7 @@ import java.util.stream.IntStream;
 import com.ak.spring.Application;
 import com.ak.spring.data.entity.Player;
 import com.ak.spring.data.repository.PlayerRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
@@ -22,11 +23,15 @@ class PlayerRepositoryTest {
   @Autowired
   private PlayerRepository repository;
 
-  @Test
-  void testPlayer() {
+  @BeforeEach
+  void setUp() {
     int size = 2;
     List<Player> entities = IntStream.range(0, size).mapToObj(value -> new Player()).toList();
     repository.saveAll(entities);
+  }
+
+  @Test
+  void testPlayer() {
     List<Player> players = repository.findAll();
 
     assertAll(players.toString(), () -> {

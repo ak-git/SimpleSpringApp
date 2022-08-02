@@ -20,18 +20,27 @@ public final class Player {
   @Id
   @Type(type = "uuid-char")
   @NonNull
-  private UUID uuid = UUID.randomUUID();
+  private UUID uuid;
   @Id
   @GeneratedValue(strategy = GenerationType.SEQUENCE)
   private long revision;
   @NonNull
-  private ZonedDateTime created = ZonedDateTime.now();
+  private ZonedDateTime created;
   @NonNull
   private String firstName = "";
   @NonNull
   private String surName = "";
   @NonNull
   private String lastName = "";
+
+  public Player() {
+    this(UUID.randomUUID());
+  }
+
+  public Player(@NonNull UUID uuid) {
+    this.uuid = uuid;
+    created = ZonedDateTime.now();
+  }
 
   @NonNull
   public Player copyInstance() {
@@ -53,6 +62,26 @@ public final class Player {
 
   public void setLastName(@NonNull String lastName) {
     this.lastName = lastName;
+  }
+
+  @NonNull
+  public UUID getUUID() {
+    return uuid;
+  }
+
+  @NonNull
+  public String getFirstName() {
+    return firstName;
+  }
+
+  @NonNull
+  public String getSurName() {
+    return surName;
+  }
+
+  @NonNull
+  public String getLastName() {
+    return lastName;
   }
 
   @Override

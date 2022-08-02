@@ -84,6 +84,10 @@ public final class Player {
     return lastName;
   }
 
+  public long getRevision() {
+    return revision;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {

@@ -32,6 +32,8 @@ public final class PlayerController {
       player.setLastName(lastName);
       return player;
     }
+
+    public static final PlayerRecord EMPTY = new PlayerRecord("", "", "");
   }
 
   @NonNull
@@ -72,7 +74,6 @@ public final class PlayerController {
 
   @DeleteMapping("/{uuid}")
   public ResponseEntity<Player> deletePlayer(@PathVariable("uuid") @NonNull UUID uuid) {
-    PlayerRecord p = new PlayerRecord("", "", "");
-    return new ResponseEntity<>(playerRepository.save(p.toPlayer(() -> new Player(uuid))), HttpStatus.ACCEPTED);
+    return new ResponseEntity<>(playerRepository.save(PlayerRecord.EMPTY.toPlayer(() -> new Player(uuid))), HttpStatus.ACCEPTED);
   }
 }

@@ -3,6 +3,7 @@ package com.ak.spring.controller;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import com.ak.spring.data.entity.Player;
 import com.ak.spring.data.repository.PlayerRepository;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -49,7 +51,13 @@ public final class PlayerController {
   @GetMapping("/{uuid}")
   @NonNull
   public ResponseEntity<Player> getPlayerByUUID(@PathVariable("uuid") @NonNull UUID uuid) {
-    return new ResponseEntity<>(playerRepository.findByUUID(uuid), HttpStatus.OK);
+    Player player = playerRepository.findByUUID(uuid);
+    if (Stream.of(player.getFirstName(), player.getSurName(), player.getLastName()).allMatch(String::isEmpty)) {
+      return new ResponseEntity<>(HttpStatus.OK);
+    }
+    else {
+      return new ResponseEntity<>(player, HttpStatus.OK);
+    }
   }
 
   @PostMapping("/")
@@ -59,6 +67,12 @@ public final class PlayerController {
 
   @PutMapping("/{uuid}")
   public ResponseEntity<Player> updatePlayer(@PathVariable("uuid") @NonNull UUID uuid, @RequestBody @NonNull PlayerRecord p) {
+    return new ResponseEntity<>(playerRepository.save(p.toPlayer(() -> new Player(uuid))), HttpStatus.OK);
+  }
+
+  @DeleteMapping("/{uuid}")
+  public ResponseEntity<Player> deletePlayer(@PathVariable("uuid") @NonNull UUID uuid) {
+    PlayerRecord p = new PlayerRecord("", "", "");
     return new ResponseEntity<>(playerRepository.save(p.toPlayer(() -> new Player(uuid))), HttpStatus.OK);
   }
 }

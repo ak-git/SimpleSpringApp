@@ -1,12 +1,12 @@
 package com.ak.spring.controller;
 
 import java.util.Objects;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import com.ak.spring.Application;
 import com.ak.spring.data.entity.Player;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +16,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.http.MediaType;
 import org.springframework.lang.NonNull;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
@@ -77,76 +78,23 @@ class PlayerControllerTest {
 
   @ParameterizedTest
   @MethodSource("player")
-  void getPlayerByUUID(@NonNull PlayerController.PlayerRecord playerRecord) throws Exception {
-    Player player = controller.createPlayer(playerRecord).getBody();
-    assertNotNull(player);
-    Assertions.assertAll(player.toString(), () -> {
-      assertThat(player.getFirstName()).isEqualTo(playerRecord.firstName());
-      assertThat(player.getSurName()).isEqualTo(playerRecord.surName());
-      assertThat(player.getLastName()).isEqualTo(playerRecord.lastName());
-      assertThat(controller.getPlayerHistoryByUUID(player.getUUID()).getBody()).hasSize(1);
-    });
-
-    assertNotNull(
-        mvc.perform(MockMvcRequestBuilders
-                .get("/controller/player/%s".formatted(player.getUUID())).accept(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.uuid", is(player.getUUID().toString())))
-            .andExpect(jsonPath("$.firstName", is(playerRecord.firstName())))
-            .andExpect(jsonPath("$.surName", is(playerRecord.surName())))
-            .andExpect(jsonPath("$.lastName", is(playerRecord.lastName())))
-    );
-
-    PlayerController.PlayerRecord playerRecord2 = new PlayerController.PlayerRecord(playerRecord.firstName(), "V2", playerRecord.lastName());
-    Player player2 = controller.updatePlayer(player.getUUID(), playerRecord2).getBody();
-    assertNotNull(player2);
-    Assertions.assertAll(player.toString(), () -> {
-      assertThat(player2.getFirstName()).isEqualTo(playerRecord2.firstName());
-      assertThat(player2.getSurName()).isEqualTo(playerRecord2.surName());
-      assertThat(player2.getLastName()).isEqualTo(playerRecord2.lastName());
-      assertThat(controller.getPlayerHistoryByUUID(player2.getUUID()).getBody()).hasSize(2);
-    });
-
-    assertNotNull(
-        mvc.perform(MockMvcRequestBuilders
-                .get("/controller/player/%s".formatted(player.getUUID())).accept(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.uuid", is(player2.getUUID().toString())))
-            .andExpect(jsonPath("$.firstName", is(playerRecord2.firstName())))
-            .andExpect(jsonPath("$.surName", is(playerRecord2.surName())))
-            .andExpect(jsonPath("$.lastName", is(playerRecord2.lastName())))
-    );
-  }
-
-  @ParameterizedTest
-  @MethodSource("player")
-  void createPlayer(@NonNull PlayerController.PlayerRecord playerRecord) throws Exception {
-    assertNotNull(
-        mvc.perform(MockMvcRequestBuilders
-                .post("/controller/player/")
-                .content(mapper.writeValueAsString(playerRecord))
-                .contentType(MediaType.APPLICATION_JSON)
-            )
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.uuid", notNullValue()))
-            .andExpect(jsonPath("$.firstName", is(playerRecord.firstName())))
-            .andExpect(jsonPath("$.surName", is(playerRecord.surName())))
-            .andExpect(jsonPath("$.lastName", is(playerRecord.lastName())))
-    );
+  void testCreatePlayer(@NonNull PlayerController.PlayerRecord playerRecord) throws Exception {
+    assertNotNull(createPlayer(playerRecord));
   }
 
   @ParameterizedTest
   @MethodSource("player")
   void updatePlayer(@NonNull PlayerController.PlayerRecord playerRecord) throws Exception {
-    Player player = controller.createPlayer(playerRecord).getBody();
-    assertNotNull(player);
-    PlayerController.PlayerRecord playerRecord2 = new PlayerController.PlayerRecord(playerRecord.firstName(), "V2", playerRecord.lastName());
+    UUID uuid = createPlayer(playerRecord);
+    checkGetPlayerByUUID(uuid, playerRecord);
+    PlayerController.PlayerRecord playerRecord2 = new PlayerController.PlayerRecord(
+        playerRecord.firstName(), "V2", playerRecord.lastName()
+    );
     assertNotNull(
         mvc.perform(MockMvcRequestBuilders
-                .put("/controller/player/%s".formatted(player.getUUID()))
+                .put("/controller/player/%s".formatted(uuid))
                 .content(mapper.writeValueAsString(playerRecord2))
-                .contentType(MediaType.APPLICATION_JSON)
-            )
+                .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.uuid", notNullValue()))
             .andExpect(jsonPath("$.firstName", is(playerRecord2.firstName())))
@@ -155,7 +103,7 @@ class PlayerControllerTest {
     );
     assertNotNull(
         mvc.perform(MockMvcRequestBuilders
-                .get("/controller/player/history/%s".formatted(player.getUUID())).accept(MediaType.APPLICATION_JSON))
+                .get("/controller/player/history/%s".formatted(uuid)).accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$", hasSize(2)))
             .andExpect(jsonPath("$[*].firstName", hasItems(playerRecord.firstName(), playerRecord2.firstName())))
@@ -163,34 +111,16 @@ class PlayerControllerTest {
             .andExpect(jsonPath("$[1].surName", is(playerRecord.surName())))
             .andExpect(jsonPath("$[*].lastName", hasItems(playerRecord.lastName(), playerRecord2.lastName())))
     );
-    assertNotNull(
-        mvc.perform(MockMvcRequestBuilders
-                .get("/controller/player/%s".formatted(player.getUUID())).accept(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.uuid", is(player.getUUID().toString())))
-            .andExpect(jsonPath("$.firstName", is(playerRecord2.firstName())))
-            .andExpect(jsonPath("$.surName", is(playerRecord2.surName())))
-            .andExpect(jsonPath("$.lastName", is(playerRecord2.lastName())))
-    );
+    checkGetPlayerByUUID(uuid, playerRecord2);
   }
 
   @ParameterizedTest
   @MethodSource("player")
   void deletePlayer(@NonNull PlayerController.PlayerRecord playerRecord) throws Exception {
-    Player player = controller.createPlayer(playerRecord).getBody();
-    assertNotNull(player);
+    UUID uuid = createPlayer(playerRecord);
     assertNotNull(
         mvc.perform(MockMvcRequestBuilders
-                .get("/controller/player/%s".formatted(player.getUUID())).accept(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.uuid", is(player.getUUID().toString())))
-            .andExpect(jsonPath("$.firstName", is(playerRecord.firstName())))
-            .andExpect(jsonPath("$.surName", is(playerRecord.surName())))
-            .andExpect(jsonPath("$.lastName", is(playerRecord.lastName())))
-    );
-    assertNotNull(
-        mvc.perform(MockMvcRequestBuilders
-                .get("/controller/player/history/%s".formatted(player.getUUID())).accept(MediaType.APPLICATION_JSON))
+                .get("/controller/player/history/%s".formatted(uuid)).accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$", hasSize(1)))
             .andExpect(jsonPath("$[*].firstName", hasItems(playerRecord.firstName())))
@@ -199,13 +129,13 @@ class PlayerControllerTest {
     );
     assertNotNull(
         mvc.perform(MockMvcRequestBuilders
-                .delete("/controller/player/%s".formatted(player.getUUID())))
+                .delete("/controller/player/%s".formatted(uuid)))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.uuid", notNullValue()))
     );
     assertNotNull(
         mvc.perform(MockMvcRequestBuilders
-                .get("/controller/player/history/%s".formatted(player.getUUID())).accept(MediaType.APPLICATION_JSON))
+                .get("/controller/player/history/%s".formatted(uuid)).accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$", hasSize(2)))
             .andExpect(jsonPath("$[*].firstName", hasItems(playerRecord.firstName(), "")))
@@ -214,9 +144,38 @@ class PlayerControllerTest {
     );
     assertNotNull(
         mvc.perform(MockMvcRequestBuilders
-                .get("/controller/player/%s".formatted(player.getUUID())).accept(MediaType.APPLICATION_JSON))
+                .get("/controller/player/%s".formatted(uuid)).accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(MockMvcResultMatchers.content().string(""))
+    );
+  }
+
+  @NonNull
+  private UUID createPlayer(@NonNull PlayerController.PlayerRecord playerRecord) throws Exception {
+    MockHttpServletResponse response = mvc.perform(MockMvcRequestBuilders
+            .post("/controller/player/")
+            .content(mapper.writeValueAsString(playerRecord))
+            .contentType(MediaType.APPLICATION_JSON)
+        )
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.uuid", notNullValue()))
+        .andExpect(jsonPath("$.firstName", is(playerRecord.firstName())))
+        .andExpect(jsonPath("$.surName", is(playerRecord.surName())))
+        .andExpect(jsonPath("$.lastName", is(playerRecord.lastName()))).andReturn().getResponse();
+
+    Player player = new ObjectMapper().reader().readValue(response.getContentAsString(), Player.class);
+    return player.getUUID();
+  }
+
+  private void checkGetPlayerByUUID(@NonNull UUID uuid, @NonNull PlayerController.PlayerRecord playerRecord) throws Exception {
+    assertNotNull(
+        mvc.perform(MockMvcRequestBuilders
+                .get("/controller/player/%s".formatted(uuid)).accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.uuid", is(uuid.toString())))
+            .andExpect(jsonPath("$.firstName", is(playerRecord.firstName())))
+            .andExpect(jsonPath("$.surName", is(playerRecord.surName())))
+            .andExpect(jsonPath("$.lastName", is(playerRecord.lastName())))
     );
   }
 

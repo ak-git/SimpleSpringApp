@@ -52,8 +52,8 @@ public final class PlayerController {
   @NonNull
   public ResponseEntity<Player> getPlayerByUUID(@PathVariable("uuid") @NonNull UUID uuid) {
     Player player = playerRepository.findByUUID(uuid);
-    if (Stream.of(player.getFirstName(), player.getSurName(), player.getLastName()).allMatch(String::isEmpty)) {
-      return new ResponseEntity<>(HttpStatus.OK);
+    if (player == null || Stream.of(player.getFirstName(), player.getSurName(), player.getLastName()).allMatch(String::isEmpty)) {
+      return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
     else {
       return new ResponseEntity<>(player, HttpStatus.OK);
@@ -73,6 +73,6 @@ public final class PlayerController {
   @DeleteMapping("/{uuid}")
   public ResponseEntity<Player> deletePlayer(@PathVariable("uuid") @NonNull UUID uuid) {
     PlayerRecord p = new PlayerRecord("", "", "");
-    return new ResponseEntity<>(playerRepository.save(p.toPlayer(() -> new Player(uuid))), HttpStatus.OK);
+    return new ResponseEntity<>(playerRepository.save(p.toPlayer(() -> new Player(uuid))), HttpStatus.ACCEPTED);
   }
 }

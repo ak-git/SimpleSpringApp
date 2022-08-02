@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -25,6 +26,6 @@ public interface PlayerRepository extends JpaRepository<Player, RevisionableId> 
    * @return single Player
    */
   @Query("select a from Player a left outer join Player b ON a.uuid = b.uuid AND a.revision < b.revision where b.uuid is null and a.uuid = :uuid")
-  @NonNull
+  @Nullable
   Player findByUUID(@Param("uuid") @NonNull UUID uuid);
 }

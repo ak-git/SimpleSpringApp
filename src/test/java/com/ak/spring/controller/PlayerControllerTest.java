@@ -98,12 +98,13 @@ class PlayerControllerTest {
             .andExpect(jsonPath("$.lastName", is(playerRecord.lastName())))
     );
 
-    Player player2 = controller.updatePlayer(player.getUUID(), new PlayerController.PlayerRecord(playerRecord.firstName(), "V2", playerRecord.lastName())).getBody();
+    PlayerController.PlayerRecord playerRecord2 = new PlayerController.PlayerRecord(playerRecord.firstName(), "V2", playerRecord.lastName());
+    Player player2 = controller.updatePlayer(player.getUUID(), playerRecord2).getBody();
     assertNotNull(player2);
     Assertions.assertAll(player.toString(), () -> {
-      assertThat(player2.getFirstName()).isEqualTo(playerRecord.firstName());
-      assertThat(player2.getSurName()).isEqualTo("V2");
-      assertThat(player2.getLastName()).isEqualTo(playerRecord.lastName());
+      assertThat(player2.getFirstName()).isEqualTo(playerRecord2.firstName());
+      assertThat(player2.getSurName()).isEqualTo(playerRecord2.surName());
+      assertThat(player2.getLastName()).isEqualTo(playerRecord2.lastName());
       assertThat(controller.getPlayerHistoryByUUID(player2.getUUID()).getBody()).hasSize(2);
     });
 
@@ -113,9 +114,9 @@ class PlayerControllerTest {
             )
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.uuid", is(player2.getUUID().toString())))
-            .andExpect(jsonPath("$.firstName", is(playerRecord.firstName())))
-            .andExpect(jsonPath("$.surName", is("V2")))
-            .andExpect(jsonPath("$.lastName", is(playerRecord.lastName())))
+            .andExpect(jsonPath("$.firstName", is(playerRecord2.firstName())))
+            .andExpect(jsonPath("$.surName", is(playerRecord2.surName())))
+            .andExpect(jsonPath("$.lastName", is(playerRecord2.lastName())))
     );
   }
 
@@ -134,6 +135,48 @@ class PlayerControllerTest {
             .andExpect(jsonPath("$.firstName", is(playerRecord.firstName())))
             .andExpect(jsonPath("$.surName", is(playerRecord.surName())))
             .andExpect(jsonPath("$.lastName", is(playerRecord.lastName())))
+    );
+  }
+
+  @ParameterizedTest
+  @MethodSource("player")
+  void updatePlayer(@NonNull PlayerController.PlayerRecord playerRecord) throws Exception {
+    Player player = controller.createPlayer(playerRecord).getBody();
+    assertNotNull(player);
+    PlayerController.PlayerRecord playerRecord2 = new PlayerController.PlayerRecord(playerRecord.firstName(), "V2", playerRecord.lastName());
+    assertNotNull(
+        mvc.perform(MockMvcRequestBuilders
+                .put("/controller/player/%s".formatted(player.getUUID()))
+                .content(mapper.writeValueAsString(playerRecord2))
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+            )
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.uuid", notNullValue()))
+            .andExpect(jsonPath("$.firstName", is(playerRecord2.firstName())))
+            .andExpect(jsonPath("$.surName", is(playerRecord2.surName())))
+            .andExpect(jsonPath("$.lastName", is(playerRecord2.lastName())))
+    );
+    assertNotNull(
+        mvc.perform(
+                MockMvcRequestBuilders.get("/controller/player/history/%s".formatted(player.getUUID())).accept(MediaType.APPLICATION_JSON)
+            )
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", hasSize(2)))
+            .andExpect(jsonPath("$[*].firstName", hasItems(playerRecord.firstName(), playerRecord2.firstName())))
+            .andExpect(jsonPath("$[0].surName", is(playerRecord2.surName())))
+            .andExpect(jsonPath("$[1].surName", is(playerRecord.surName())))
+            .andExpect(jsonPath("$[*].lastName", hasItems(playerRecord.lastName(), playerRecord2.lastName())))
+    );
+    assertNotNull(
+        mvc.perform(
+                MockMvcRequestBuilders.get("/controller/player/%s".formatted(player.getUUID())).accept(MediaType.APPLICATION_JSON)
+            )
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.uuid", is(player.getUUID().toString())))
+            .andExpect(jsonPath("$.firstName", is(playerRecord2.firstName())))
+            .andExpect(jsonPath("$.surName", is(playerRecord2.surName())))
+            .andExpect(jsonPath("$.lastName", is(playerRecord2.lastName())))
     );
   }
 

@@ -58,7 +58,7 @@ public final class PlayerController {
   }
 
   @PutMapping("/{uuid}")
-  public ResponseEntity<Player> updatePlayer(@PathVariable("uuid") UUID uuid, @RequestBody PlayerRecord p) {
+  public ResponseEntity<Player> updatePlayer(@PathVariable("uuid") @NonNull UUID uuid, @RequestBody @NonNull PlayerRecord p) {
     return new ResponseEntity<>(playerRepository.save(p.toPlayer(() -> new Player(uuid))), HttpStatus.OK);
   }
 }

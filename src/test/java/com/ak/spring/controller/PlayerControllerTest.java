@@ -18,6 +18,7 @@ import org.springframework.http.MediaType;
 import org.springframework.lang.NonNull;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -49,7 +50,7 @@ class PlayerControllerTest {
   @ParameterizedTest
   @MethodSource("player")
   void testGetPlayerHistoryByUUID(@NonNull PlayerController.PlayerRecord playerRecord) throws Exception {
-    Player player = getPlayerByUUID(createPlayer(playerRecord), playerRecord);
+    Player player = createPlayer(playerRecord);
     Player p2 = updatePlayer(player.getUUID(), new PlayerController.PlayerRecord(playerRecord.firstName(), "second", playerRecord.lastName()));
     Player p3 = updatePlayer(player.getUUID(), new PlayerController.PlayerRecord(playerRecord.firstName(), "third", playerRecord.lastName()));
     assertThat(controller.getPlayerHistoryByUUID(player.getUUID()).getBody())
@@ -76,6 +77,14 @@ class PlayerControllerTest {
     assertNotNull(createPlayer(playerRecord));
   }
 
+  @ParameterizedTest
+  @MethodSource("player")
+  void testGetPlayer(@NonNull PlayerController.PlayerRecord playerRecord) throws Exception {
+    Player player1 = createPlayer(playerRecord);
+    Player player2 = getPlayerByUUID(player1.getUUID(), playerRecord);
+    assertThat(player1).isEqualTo(player2);
+  }
+
   @Test
   void testInvalidUUID() throws Exception {
     assertNotNull(
@@ -89,16 +98,15 @@ class PlayerControllerTest {
   @ParameterizedTest
   @MethodSource("player")
   void testUpdatePlayer(@NonNull PlayerController.PlayerRecord playerRecord) throws Exception {
-    UUID uuid = createPlayer(playerRecord);
-    Player player1 = getPlayerByUUID(uuid, playerRecord);
+    Player player1 = createPlayer(playerRecord);
     PlayerController.PlayerRecord playerRecord2 = new PlayerController.PlayerRecord(
         playerRecord.firstName(), "V2", playerRecord.lastName()
     );
-    Player player2 = updatePlayer(uuid, playerRecord2);
+    Player player2 = updatePlayer(player1.getUUID(), playerRecord2);
     assertThat(player1).isNotEqualTo(player2);
     assertNotNull(
         mvc.perform(MockMvcRequestBuilders
-                .get("/controller/player/history/%s".formatted(uuid)).accept(MediaType.APPLICATION_JSON))
+                .get("/controller/player/history/%s".formatted(player1.getUUID())).accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$", hasSize(2)))
             .andExpect(jsonPath("$[*].firstName", hasItems(playerRecord.firstName(), playerRecord2.firstName())))
@@ -111,7 +119,7 @@ class PlayerControllerTest {
   @ParameterizedTest
   @MethodSource("player")
   void testDeletePlayer(@NonNull PlayerController.PlayerRecord playerRecord) throws Exception {
-    UUID uuid = createPlayer(playerRecord);
+    UUID uuid = createPlayer(playerRecord).getUUID();
     assertNotNull(
         mvc.perform(MockMvcRequestBuilders
                 .get("/controller/player/history/%s".formatted(uuid)).accept(MediaType.APPLICATION_JSON))
@@ -145,43 +153,30 @@ class PlayerControllerTest {
   }
 
   @NonNull
-  private UUID createPlayer(@NonNull PlayerController.PlayerRecord playerRecord) throws Exception {
-    MockHttpServletResponse response = mvc.perform(MockMvcRequestBuilders
-            .post("/controller/player/")
+  private Player createPlayer(@NonNull PlayerController.PlayerRecord playerRecord) throws Exception {
+    return check(MockMvcRequestBuilders.post("/controller/player/")
             .content(mapper.writeValueAsString(playerRecord))
-            .contentType(MediaType.APPLICATION_JSON)
-        )
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.uuid", notNullValue()))
-        .andExpect(jsonPath("$.firstName", is(playerRecord.firstName())))
-        .andExpect(jsonPath("$.surName", is(playerRecord.surName())))
-        .andExpect(jsonPath("$.lastName", is(playerRecord.lastName())))
-        .andExpect(jsonPath("$.revision", greaterThan(0)))
-        .andReturn().getResponse();
-
-    Player player = new ObjectMapper().reader().readValue(response.getContentAsString(), Player.class);
-    assertThat(player.getRevision()).isPositive();
-    return player.getUUID();
+            .contentType(MediaType.APPLICATION_JSON),
+        playerRecord
+    );
   }
 
   private Player getPlayerByUUID(@NonNull UUID uuid, @NonNull PlayerController.PlayerRecord playerRecord) throws Exception {
-    MockHttpServletResponse response = mvc.perform(MockMvcRequestBuilders
-            .get("/controller/player/%s".formatted(uuid)).accept(MediaType.APPLICATION_JSON))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.uuid", is(uuid.toString())))
-        .andExpect(jsonPath("$.firstName", is(playerRecord.firstName())))
-        .andExpect(jsonPath("$.surName", is(playerRecord.surName())))
-        .andExpect(jsonPath("$.lastName", is(playerRecord.lastName())))
-        .andExpect(jsonPath("$.revision", greaterThan(0)))
-        .andReturn().getResponse();
-    return new ObjectMapper().reader().readValue(response.getContentAsString(), Player.class);
+    return check(MockMvcRequestBuilders.get("/controller/player/%s".formatted(uuid)).accept(MediaType.APPLICATION_JSON),
+        playerRecord
+    );
   }
 
   private Player updatePlayer(@NonNull UUID uuid, @NonNull PlayerController.PlayerRecord playerRecord) throws Exception {
-    MockHttpServletResponse response = mvc.perform(MockMvcRequestBuilders
-            .put("/controller/player/%s".formatted(uuid))
+    return check(MockMvcRequestBuilders.put("/controller/player/%s".formatted(uuid))
             .content(mapper.writeValueAsString(playerRecord))
-            .contentType(MediaType.APPLICATION_JSON))
+            .contentType(MediaType.APPLICATION_JSON),
+        playerRecord
+    );
+  }
+
+  private Player check(MockHttpServletRequestBuilder requestBuilder, @NonNull PlayerController.PlayerRecord playerRecord) throws Exception {
+    MockHttpServletResponse response = mvc.perform(requestBuilder)
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.uuid", notNullValue()))
         .andExpect(jsonPath("$.firstName", is(playerRecord.firstName())))

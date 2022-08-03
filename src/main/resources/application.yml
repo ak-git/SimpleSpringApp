@@ -1,0 +1,9 @@
+spring:
+  main:
+    web-application-type: servlet
+    banner-mode: off
+logging:
+  file.name: spring.log
+  level:
+    org:
+      springframework: info

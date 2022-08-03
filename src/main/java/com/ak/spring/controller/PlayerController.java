@@ -24,6 +24,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/controller/player")
 public final class PlayerController {
   public record PlayerRecord(@NonNull String firstName, @NonNull String surName, @NonNull String lastName) {
+    public static final PlayerRecord EMPTY = new PlayerRecord("", "", "");
+
     @NonNull
     Player toPlayer(@NonNull Supplier<Player> p) {
       Player player = p.get();
@@ -32,8 +34,6 @@ public final class PlayerController {
       player.setLastName(lastName);
       return player;
     }
-
-    public static final PlayerRecord EMPTY = new PlayerRecord("", "", "");
   }
 
   @NonNull

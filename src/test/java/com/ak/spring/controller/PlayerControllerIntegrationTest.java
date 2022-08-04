@@ -10,7 +10,6 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SpringBootTest(classes = {Application.class, PlayerController.class}, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -22,15 +21,20 @@ class PlayerControllerIntegrationTest {
 
   @Test
   void index() {
-    PlayerController.PlayerRecord record = new PlayerController.PlayerRecord("Alexander", "V", "K");
-    Player player = template.postForObject("/controller/player/", record, Player.class);
+    Player player = template.postForObject("/controller/player/",
+        new PlayerController.PlayerRecord("Alexander", "V", "K"), Player.class
+    );
     assertNotNull(player);
-    assertAll(player.toString(), () -> {
-      assertThat(player.getUUID().toString()).isNotBlank();
-      assertThat(player.getRevision()).isPositive();
-      assertThat(player.getFirstName()).isEqualTo(record.firstName());
-      assertThat(player.getSurName()).isEqualTo(record.surName());
-      assertThat(player.getLastName()).isEqualTo(record.lastName());
-    });
+    template.put("/controller/player/%s".formatted(player.getUUID()),
+        new PlayerController.PlayerRecord("Alexander", "V2", "K2")
+    );
+    assertThat(template.getForObject("/controller/player/%s".formatted(player.getUUID()), Player.class))
+        .isNotEqualTo(player);
+    template.delete("/controller/player/%s".formatted(player.getUUID()));
+    Player[] history = template.getForObject("/controller/player/history/%s".formatted(player.getUUID()), Player[].class);
+    assertThat(history).hasSize(3);
+    for (int i = 1; i < history.length; i++) {
+      assertThat(history[i].getRevision()).isLessThan(history[i - 1].getRevision());
+    }
   }
 }

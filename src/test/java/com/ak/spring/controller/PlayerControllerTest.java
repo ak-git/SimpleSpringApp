@@ -21,6 +21,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
@@ -79,6 +80,7 @@ class PlayerControllerTest {
     assertNotNull(
         mvc.perform(MockMvcRequestBuilders
                 .get("/controller/player/%s".formatted(UUID.randomUUID())).accept(MediaType.APPLICATION_JSON))
+            .andDo(MockMvcResultHandlers.print())
             .andExpect(status().isNoContent())
             .andExpect(content().string(""))
     );
@@ -104,6 +106,7 @@ class PlayerControllerTest {
     assertNotNull(
         mvc.perform(MockMvcRequestBuilders
                 .delete("/controller/player/%s".formatted(uuid)))
+            .andDo(MockMvcResultHandlers.print())
             .andExpect(status().isAccepted())
             .andExpect(jsonPath("$.uuid", notNullValue()))
     );
@@ -111,6 +114,7 @@ class PlayerControllerTest {
     assertNotNull(
         mvc.perform(MockMvcRequestBuilders
                 .get("/controller/player/%s".formatted(uuid)).accept(MediaType.APPLICATION_JSON))
+            .andDo(MockMvcResultHandlers.print())
             .andExpect(status().isNoContent())
             .andExpect(MockMvcResultMatchers.content().string(""))
     );
@@ -141,6 +145,7 @@ class PlayerControllerTest {
 
   private Player check(MockHttpServletRequestBuilder requestBuilder, @NonNull PlayerController.PlayerRecord playerRecord) throws Exception {
     MockHttpServletResponse response = mvc.perform(requestBuilder)
+        .andDo(MockMvcResultHandlers.print())
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.uuid", notNullValue()))
         .andExpect(jsonPath("$.firstName", is(playerRecord.firstName())))
@@ -151,9 +156,10 @@ class PlayerControllerTest {
     return new ObjectMapper().reader().readValue(response.getContentAsString(), Player.class);
   }
 
-  private Player[] checkHistory(@NonNull UUID uuid, PlayerController.PlayerRecord... records) throws Exception {
+  private Player[] checkHistory(@NonNull UUID uuid, @NonNull PlayerController.PlayerRecord... records) throws Exception {
     ResultActions actions = mvc.perform(MockMvcRequestBuilders
             .get("/controller/player/history/%s".formatted(uuid)).accept(MediaType.APPLICATION_JSON))
+        .andDo(MockMvcResultHandlers.print())
         .andExpect(status().isOk())
         .andExpect(jsonPath("$", hasSize(records.length)));
 

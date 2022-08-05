@@ -53,15 +53,6 @@ allprojects {
     group = 'com.ak'
     version = '2022.07.30'
     apply plugin: 'idea'
-    idea {
-        module {
-            inheritOutputDirs = true
-        }
-    }
-
-    sourceSets {
-        main.output.resourcesDir = main.java.classesDirectory
-    }
 
     apply plugin: 'java'
     apply plugin: 'java-library'

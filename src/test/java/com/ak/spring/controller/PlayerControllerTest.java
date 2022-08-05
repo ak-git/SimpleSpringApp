@@ -51,10 +51,10 @@ class PlayerControllerTest {
   void testGetPlayerHistoryByUUID(@NonNull PlayerController.PlayerRecord playerRecord) throws Exception {
     Player player = createPlayer(playerRecord);
     PlayerController.PlayerRecord second = new PlayerController.PlayerRecord(
-        playerRecord.firstName(), "second", playerRecord.lastName(), "1981-07-03");
+        playerRecord.firstName(), "second", playerRecord.lastName(), "1981-07-03", Player.Gender.MALE);
     Player p2 = updatePlayer(player.getUUID(), second);
     PlayerController.PlayerRecord third = new PlayerController.PlayerRecord(
-        playerRecord.firstName(), "third", playerRecord.lastName(), "1981-07-03");
+        playerRecord.firstName(), "third", playerRecord.lastName(), "1981-07-03", Player.Gender.MALE);
     Player p3 = updatePlayer(player.getUUID(), third);
 
     Player[] players = checkHistory(player.getUUID(), third, second, playerRecord);
@@ -93,7 +93,7 @@ class PlayerControllerTest {
   void testUpdatePlayer(@NonNull PlayerController.PlayerRecord playerRecord) throws Exception {
     Player player1 = createPlayer(playerRecord);
     PlayerController.PlayerRecord playerRecord2 = new PlayerController.PlayerRecord(
-        playerRecord.firstName(), "V2", playerRecord.lastName(), "1981-07-03"
+        playerRecord.firstName(), "V2", playerRecord.lastName(), "1981-07-03", Player.Gender.MALE
     );
     Player player2 = updatePlayer(player1.getUUID(), playerRecord2);
     assertThat(player1).isNotEqualTo(player2);
@@ -112,7 +112,8 @@ class PlayerControllerTest {
             .andExpect(status().isAccepted())
             .andExpect(jsonPath("$.uuid", notNullValue()))
     );
-    assertThat(checkHistory(uuid, PlayerController.PlayerRecord.EMPTY, playerRecord)).hasSize(2);
+    var empty = new PlayerController.PlayerRecord("", "", "", "", Player.Gender.MALE);
+    assertThat(checkHistory(uuid, empty, playerRecord)).hasSize(2);
     assertNotNull(
         mvc.perform(MockMvcRequestBuilders
                 .get("/controller/player/%s".formatted(uuid)).accept(MediaType.APPLICATION_JSON))
@@ -154,6 +155,7 @@ class PlayerControllerTest {
         .andExpect(jsonPath("$.surName", is(playerRecord.surName())))
         .andExpect(jsonPath("$.lastName", is(playerRecord.lastName())))
         .andExpect(jsonPath("$.birthDate", is(playerRecord.birthDate())))
+        .andExpect(jsonPath("$.gender", is(playerRecord.gender().toString())))
         .andExpect(jsonPath("$.revision", greaterThan(0)))
         .andReturn().getResponse();
     return new ObjectMapper().reader().readValue(response.getContentAsString(), Player.class);
@@ -173,12 +175,13 @@ class PlayerControllerTest {
           .andExpect(jsonPath("$[%d].firstName".formatted(i), is(record.firstName())))
           .andExpect(jsonPath("$[%d].surName".formatted(i), is(record.surName())))
           .andExpect(jsonPath("$[%d].lastName".formatted(i), is(record.lastName())))
-          .andExpect(jsonPath("$[%d].birthDate".formatted(i), is(record.birthDate())));
+          .andExpect(jsonPath("$[%d].birthDate".formatted(i), is(record.birthDate())))
+          .andExpect(jsonPath("$[%d].gender".formatted(i), is(record.gender().toString())));
     }
     return new ObjectMapper().reader().readValue(actions.andReturn().getResponse().getContentAsString(), Player[].class);
   }
 
   private static Stream<PlayerController.PlayerRecord> player() {
-    return Stream.of(new PlayerController.PlayerRecord("Alexander", "V", "K", "1981-07-03"));
+    return Stream.of(new PlayerController.PlayerRecord("Alexander", "V", "K", "1981-07-03", Player.Gender.MALE));
   }
 }

@@ -24,9 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/controller/player")
 public final class PlayerController {
   public record PlayerRecord(@NonNull String firstName, @NonNull String surName, @NonNull String lastName,
-                             @NonNull String birthDate) {
-    public static final PlayerRecord EMPTY = new PlayerRecord("", "", "", "");
-
+                             @NonNull String birthDate, @NonNull Player.Gender gender) {
     @NonNull
     Player toPlayer(@NonNull Supplier<Player> p) {
       Player player = p.get();
@@ -34,12 +32,8 @@ public final class PlayerController {
       player.setSurName(surName);
       player.setLastName(lastName);
       player.setBirthDate(birthDate);
+      player.setGender(gender);
       return player;
-    }
-
-    static boolean isEmpty(Player p) {
-      return p == null ||
-          Stream.of(p.getFirstName(), p.getSurName(), p.getLastName(), p.getBirthDate()).allMatch(String::isEmpty);
     }
   }
 
@@ -61,7 +55,7 @@ public final class PlayerController {
   @NonNull
   public ResponseEntity<Player> getPlayerByUUID(@PathVariable("uuid") @NonNull UUID uuid) {
     Player player = playerRepository.findByUUID(uuid);
-    if (PlayerRecord.isEmpty(player)) {
+    if (player == null || Stream.of(player.getFirstName(), player.getSurName(), player.getLastName()).allMatch(String::isBlank)) {
       return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
     else {
@@ -81,6 +75,6 @@ public final class PlayerController {
 
   @DeleteMapping("/{uuid}")
   public ResponseEntity<Player> deletePlayer(@PathVariable("uuid") @NonNull UUID uuid) {
-    return new ResponseEntity<>(playerRepository.save(PlayerRecord.EMPTY.toPlayer(() -> new Player(uuid))), HttpStatus.ACCEPTED);
+    return new ResponseEntity<>(playerRepository.save(new Player(uuid)), HttpStatus.ACCEPTED);
   }
 }

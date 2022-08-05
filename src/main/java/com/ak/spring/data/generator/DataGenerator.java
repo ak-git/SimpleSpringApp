@@ -38,6 +38,7 @@ public class DataGenerator {
               entity.setBirthDate(LocalDate.of(RANDOM.nextInt(1991, 2001),
                   Month.of(RANDOM.nextInt(Month.JANUARY.ordinal(), Month.DECEMBER.ordinal()) + 1),
                   RANDOM.nextInt(1, 28)).toString());
+              entity.setGender(Player.Gender.valueOf(faker.demographic().sex().toUpperCase()));
               return entity;
             })
             .toList()

@@ -19,6 +19,10 @@ import org.springframework.lang.NonNull;
 @Entity
 @IdClass(RevisionableId.class)
 public final class Player {
+  public enum Gender {
+    MALE, FEMALE
+  }
+
   @Id
   @Type(type = "uuid-char")
   @NonNull
@@ -35,6 +39,8 @@ public final class Player {
   @NonNull
   private String lastName = "";
   private LocalDate birthDate;
+  @NonNull
+  private Gender gender = Gender.MALE;
 
   public Player() {
     this(UUID.randomUUID());
@@ -72,6 +78,10 @@ public final class Player {
     birthDate = isoDate.isBlank() ? null : LocalDate.parse(isoDate);
   }
 
+  public void setGender(@NonNull Gender gender) {
+    this.gender = gender;
+  }
+
   @NonNull
   public UUID getUUID() {
     return uuid;
@@ -100,6 +110,11 @@ public final class Player {
     return birthDate == null ? "" : birthDate.format(DateTimeFormatter.ISO_DATE);
   }
 
+  @NonNull
+  public String getGender() {
+    return gender.name();
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -118,7 +133,7 @@ public final class Player {
 
   @Override
   public String toString() {
-    return "Player{uuid=%s, revision=%d, created=%s, firstName='%s', surName='%s', lastName='%s', birthDate=%s}"
-        .formatted(uuid, revision, created, firstName, surName, lastName, birthDate);
+    return "Player{uuid=%s, revision=%d, created=%s, firstName='%s', surName='%s', lastName='%s', birthDate=%s, %s}"
+        .formatted(uuid, revision, created, firstName, surName, lastName, birthDate, gender);
   }
 }

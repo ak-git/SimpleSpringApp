@@ -1,5 +1,7 @@
 package com.ak.spring.controller;
 
+import java.time.LocalDate;
+
 import com.ak.spring.Application;
 import com.ak.spring.data.entity.Player;
 import org.junit.jupiter.api.Test;
@@ -22,10 +24,12 @@ class PlayerControllerIntegrationTest {
 
   @Test
   void index() {
-    PlayerController.PlayerRecord playerRecord = new PlayerController.PlayerRecord("Alexander", "V", "K", "1981-07-03", Player.Gender.MALE);
+    PlayerController.PlayerRecord playerRecord = new PlayerController.PlayerRecord(
+        "Alexander", "V", "K", LocalDate.parse("1981-07-03"), Player.Gender.MALE);
     Player player = template.postForObject("/controller/player/", playerRecord, Player.class);
     checkEquals(player, playerRecord);
-    PlayerController.PlayerRecord playerRecord2 = new PlayerController.PlayerRecord("Alexander", "V2", "K2", "1981-07-03", Player.Gender.MALE);
+    PlayerController.PlayerRecord playerRecord2 = new PlayerController.PlayerRecord(
+        "Alexander", "V2", "K2", LocalDate.parse("1981-07-03"), Player.Gender.MALE);
     template.put("/controller/player/%s".formatted(player.getUUID()), playerRecord2);
     Player player2 = template.getForObject("/controller/player/%s".formatted(player.getUUID()), Player.class);
     checkEquals(player2, playerRecord2);
@@ -43,7 +47,7 @@ class PlayerControllerIntegrationTest {
       assertThat(player.getFirstName()).isEqualTo(playerRecord.firstName());
       assertThat(player.getSurName()).isEqualTo(playerRecord.surName());
       assertThat(player.getLastName()).isEqualTo(playerRecord.lastName());
-      assertThat(player.getBirthDate()).isEqualTo(playerRecord.birthDate());
+      assertThat(player.getBirthDate()).isEqualTo(playerRecord.birthDate().toString());
       assertThat(player.getGender()).isEqualTo(playerRecord.gender().name());
     });
   }

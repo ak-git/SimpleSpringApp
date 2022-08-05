@@ -13,6 +13,7 @@ module com.ak.spring {
   requires org.hibernate.orm.core;
   requires javafaker;
   requires com.fasterxml.jackson.databind;
+  requires com.fasterxml.jackson.datatype.jsr310;
   requires org.apache.tomcat.embed.core;
 
   opens com.ak.spring to spring.core, com.fasterxml.jackson.databind;

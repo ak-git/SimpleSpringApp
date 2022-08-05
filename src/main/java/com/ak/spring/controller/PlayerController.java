@@ -1,5 +1,6 @@
 package com.ak.spring.controller;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Supplier;
@@ -24,7 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/controller/player")
 public final class PlayerController {
   public record PlayerRecord(@NonNull String firstName, @NonNull String surName, @NonNull String lastName,
-                             @NonNull String birthDate, @NonNull Player.Gender gender) {
+                             @NonNull LocalDate birthDate, @NonNull Player.Gender gender) {
     @NonNull
     Player toPlayer(@NonNull Supplier<Player> p) {
       Player player = p.get();

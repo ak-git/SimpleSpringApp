@@ -2,7 +2,6 @@ package com.ak.spring.data.entity;
 
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -13,6 +12,9 @@ import javax.persistence.Id;
 import javax.persistence.IdClass;
 
 import com.ak.spring.data.id.RevisionableId;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import org.hibernate.annotations.Type;
 import org.springframework.lang.NonNull;
 
@@ -38,7 +40,10 @@ public final class Player {
   private String surName = "";
   @NonNull
   private String lastName = "";
-  private LocalDate birthDate;
+  @JsonDeserialize(using = LocalDateDeserializer.class)
+  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+  @NonNull
+  private LocalDate birthDate = LocalDate.EPOCH;
   @NonNull
   private Gender gender = Gender.MALE;
 
@@ -74,8 +79,8 @@ public final class Player {
     this.lastName = lastName;
   }
 
-  public void setBirthDate(@NonNull String isoDate) {
-    birthDate = isoDate.isBlank() ? null : LocalDate.parse(isoDate);
+  public void setBirthDate(@NonNull LocalDate birthDate) {
+    this.birthDate = birthDate;
   }
 
   public void setGender(@NonNull Gender gender) {
@@ -107,7 +112,7 @@ public final class Player {
   }
 
   public String getBirthDate() {
-    return birthDate == null ? "" : birthDate.format(DateTimeFormatter.ISO_DATE);
+    return birthDate.toString();
   }
 
   @NonNull

@@ -47,8 +47,8 @@ class PlayerControllerIntegrationTest {
       assertThat(player.getFirstName()).isEqualTo(playerRecord.firstName());
       assertThat(player.getSurName()).isEqualTo(playerRecord.surName());
       assertThat(player.getLastName()).isEqualTo(playerRecord.lastName());
-      assertThat(player.getBirthDate()).isEqualTo(playerRecord.birthDate().toString());
-      assertThat(player.getGender()).isEqualTo(playerRecord.gender().name());
+      assertThat(player.getBirthDate()).isEqualTo(playerRecord.birthDate());
+      assertThat(player.getGender()).isEqualTo(playerRecord.gender());
     });
   }
 }

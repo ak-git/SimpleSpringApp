@@ -111,13 +111,13 @@ public final class Player {
     return revision;
   }
 
-  public String getBirthDate() {
-    return birthDate.toString();
+  public LocalDate getBirthDate() {
+    return birthDate;
   }
 
   @NonNull
-  public String getGender() {
-    return gender.name();
+  public Gender getGender() {
+    return gender;
   }
 
   @Override

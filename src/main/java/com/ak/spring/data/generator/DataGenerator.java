@@ -1,6 +1,8 @@
 package com.ak.spring.data.generator;
 
 import java.security.SecureRandom;
+import java.time.LocalDate;
+import java.time.Month;
 import java.util.Locale;
 import java.util.Random;
 import java.util.logging.Logger;
@@ -33,6 +35,9 @@ public class DataGenerator {
               entity.setFirstName(faker.name().firstName());
               entity.setSurName("");
               entity.setLastName(faker.name().lastName());
+              entity.setBirthDate(LocalDate.of(RANDOM.nextInt(1991, 2001),
+                  Month.of(RANDOM.nextInt(Month.JANUARY.ordinal(), Month.DECEMBER.ordinal()) + 1),
+                  RANDOM.nextInt(1, 28)).toString());
               return entity;
             })
             .toList()

@@ -23,8 +23,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/controller/player")
 public final class PlayerController {
-  public record PlayerRecord(@NonNull String firstName, @NonNull String surName, @NonNull String lastName) {
-    public static final PlayerRecord EMPTY = new PlayerRecord("", "", "");
+  public record PlayerRecord(@NonNull String firstName, @NonNull String surName, @NonNull String lastName,
+                             @NonNull String birthDate) {
+    public static final PlayerRecord EMPTY = new PlayerRecord("", "", "", "");
 
     @NonNull
     Player toPlayer(@NonNull Supplier<Player> p) {
@@ -32,7 +33,13 @@ public final class PlayerController {
       player.setFirstName(firstName);
       player.setSurName(surName);
       player.setLastName(lastName);
+      player.setBirthDate(birthDate);
       return player;
+    }
+
+    static boolean isEmpty(Player p) {
+      return p == null ||
+          Stream.of(p.getFirstName(), p.getSurName(), p.getLastName(), p.getBirthDate()).allMatch(String::isEmpty);
     }
   }
 
@@ -54,7 +61,7 @@ public final class PlayerController {
   @NonNull
   public ResponseEntity<Player> getPlayerByUUID(@PathVariable("uuid") @NonNull UUID uuid) {
     Player player = playerRepository.findByUUID(uuid);
-    if (player == null || Stream.of(player.getFirstName(), player.getSurName(), player.getLastName()).allMatch(String::isEmpty)) {
+    if (PlayerRecord.isEmpty(player)) {
       return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
     else {

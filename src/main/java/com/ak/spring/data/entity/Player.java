@@ -1,6 +1,8 @@
 package com.ak.spring.data.entity;
 
+import java.time.LocalDate;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -32,6 +34,7 @@ public final class Player {
   private String surName = "";
   @NonNull
   private String lastName = "";
+  private LocalDate birthDate;
 
   public Player() {
     this(UUID.randomUUID());
@@ -49,6 +52,7 @@ public final class Player {
     p.firstName = firstName;
     p.surName = surName;
     p.lastName = lastName;
+    p.birthDate = birthDate;
     return p;
   }
 
@@ -62,6 +66,10 @@ public final class Player {
 
   public void setLastName(@NonNull String lastName) {
     this.lastName = lastName;
+  }
+
+  public void setBirthDate(@NonNull String isoDate) {
+    birthDate = isoDate.isBlank() ? null : LocalDate.parse(isoDate);
   }
 
   @NonNull
@@ -88,6 +96,10 @@ public final class Player {
     return revision;
   }
 
+  public String getBirthDate() {
+    return birthDate == null ? "" : birthDate.format(DateTimeFormatter.ISO_DATE);
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -106,7 +118,7 @@ public final class Player {
 
   @Override
   public String toString() {
-    return "Player{uuid=%s, revision=%d, created=%s, firstName='%s', surName='%s', lastName='%s'}"
-        .formatted(uuid, revision, created, firstName, surName, lastName);
+    return "Player{uuid=%s, revision=%d, created=%s, firstName='%s', surName='%s', lastName='%s', birthDate=%s}"
+        .formatted(uuid, revision, created, firstName, surName, lastName, birthDate);
   }
 }

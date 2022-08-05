@@ -22,11 +22,11 @@ class PlayerControllerIntegrationTest {
   @Test
   void index() {
     Player player = template.postForObject("/controller/player/",
-        new PlayerController.PlayerRecord("Alexander", "V", "K"), Player.class
+        new PlayerController.PlayerRecord("Alexander", "V", "K", "1981-07-03"), Player.class
     );
     assertNotNull(player);
     template.put("/controller/player/%s".formatted(player.getUUID()),
-        new PlayerController.PlayerRecord("Alexander", "V2", "K2")
+        new PlayerController.PlayerRecord("Alexander", "V2", "K2", "1981-07-03")
     );
     assertThat(template.getForObject("/controller/player/%s".formatted(player.getUUID()), Player.class))
         .isNotEqualTo(player);

@@ -1,22 +1,5 @@
 version: "3.9"
 services:
-  simple-spring-app:
-    container_name: simple-spring-app
-    image: a002k/simple-spring-app
-    build:
-      context: .
-    ports:
-      - "8080:8080"
-    depends_on:
-      - pgdb
-    networks:
-      - db-net
-    environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://pgdb:5432/db
-      - SPRING_DATASOURCE_USERNAME=pguser
-      - SPRING_DATASOURCE_PASSWORD=pgpass
-      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
-
   pgdb:
     container_name: pgdb
     image: postgres:14.4
@@ -60,6 +43,33 @@ services:
     networks:
       - db-net
     restart: unless-stopped
+
+  adminer:
+    image: adminer
+    restart: unless-stopped
+    depends_on:
+      - pgdb
+    ports:
+      - "5080:8080"
+    networks:
+      - db-net
+
+  simple-spring-app:
+    container_name: simple-spring-app
+    image: a002k/simple-spring-app
+    build:
+      context: .
+    ports:
+      - "8080:8080"
+    depends_on:
+      - pgdb
+    networks:
+      - db-net
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://pgdb:5432/db
+      - SPRING_DATASOURCE_USERNAME=pguser
+      - SPRING_DATASOURCE_PASSWORD=pgpass
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
 
 networks:
   db-net:

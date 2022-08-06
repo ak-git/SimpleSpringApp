@@ -7,3 +7,64 @@ services:
       context: .
     ports:
       - "8080:8080"
+    depends_on:
+      - pgdb
+    networks:
+      - db-net
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://pgdb:5432/db
+      - SPRING_DATASOURCE_USERNAME=pguser
+      - SPRING_DATASOURCE_PASSWORD=pgpass
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+
+  pgdb:
+    container_name: pgdb
+    image: postgres:14.4
+    environment:
+      POSTGRES_DB: "db"
+      POSTGRES_USER: ${POSTGRES_USER:-pguser}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-pgpass}
+      PGDATA: "/var/lib/postgresql/data/pgdata"
+    volumes:
+      - .:/var/lib/postgresql/data
+    ports:
+      - ${POSTGRES_PORT:-5432}:5432
+    networks:
+      - db-net
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U pguser -d db" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 4G
+
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin4@pgadmin.org}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    volumes:
+      - ./pgadmin:/var/lib/pgadmin
+    ports:
+      - "${PGADMIN_PORT:-5050}:80"
+    depends_on:
+      - pgdb
+    networks:
+      - db-net
+    restart: unless-stopped
+
+networks:
+  db-net:
+    driver: bridge
+
+volumes:
+  postgres:
+  pgadmin:

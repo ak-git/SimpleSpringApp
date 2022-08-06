@@ -138,7 +138,7 @@ public final class Player {
 
   @Override
   public String toString() {
-    return "Player{uuid=%s, revision=%d, created=%s, firstName='%s', surName='%s', lastName='%s', birthDate=%s, %s}"
+    return "Player{uuid=%s, revision=%d, created=%s, '%s %s %s', %s, %s}"
         .formatted(uuid, revision, created, firstName, surName, lastName, birthDate, gender);
   }
 }

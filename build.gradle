@@ -40,6 +40,7 @@ jacoco {
 ext {
     javaVersion = JavaVersion.VERSION_18
     h2 = 'com.h2database:h2:2.1.214'
+    postgres = 'org.postgresql:postgresql:42.4.1'
     faker = 'com.github.javafaker:javafaker:1.0.2'
 }
 
@@ -84,6 +85,7 @@ allprojects {
         }
         developmentOnly 'org.springframework.boot:spring-boot-devtools'
         runtimeOnly h2
+        implementation postgres
         testImplementation('org.springframework.boot:spring-boot-starter-test') {
             exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
         }

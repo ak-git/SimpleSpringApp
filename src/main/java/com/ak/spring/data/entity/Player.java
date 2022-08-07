@@ -27,24 +27,17 @@ public final class Player {
 
   @Id
   @Type(type = "uuid-char")
-  @NonNull
   private UUID uuid;
   @Id
   @GeneratedValue(strategy = GenerationType.SEQUENCE)
   private long revision;
-  @NonNull
   private ZonedDateTime created;
-  @NonNull
   private String firstName = "";
-  @NonNull
   private String surName = "";
-  @NonNull
   private String lastName = "";
   @JsonDeserialize(using = LocalDateDeserializer.class)
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-  @NonNull
   private LocalDate birthDate = LocalDate.EPOCH;
-  @NonNull
   private Gender gender = Gender.MALE;
 
   public Player() {

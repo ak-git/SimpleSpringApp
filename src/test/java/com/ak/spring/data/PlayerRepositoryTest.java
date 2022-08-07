@@ -1,4 +1,4 @@
-package com.ak.spring.data.generator;
+package com.ak.spring.data;
 
 import java.util.List;
 import java.util.stream.IntStream;

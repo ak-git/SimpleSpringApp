@@ -1,4 +1,4 @@
-package com.ak.spring.data.generator;
+package com.ak.spring.data;
 
 import com.ak.spring.Application;
 import org.junit.jupiter.api.Assertions;

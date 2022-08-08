@@ -7,7 +7,9 @@ import java.util.stream.Stream;
 
 import com.ak.spring.Application;
 import com.ak.spring.data.entity.Player;
+import com.ak.spring.data.repository.PlayerRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -46,6 +48,13 @@ class PlayerControllerTest {
   private MockMvc mvc;
   @Autowired
   private ObjectMapper mapper;
+  @Autowired
+  private PlayerRepository repository;
+
+  @BeforeEach
+  void setUp() {
+    repository.deleteAll();
+  }
 
   @ParameterizedTest
   @MethodSource("player")

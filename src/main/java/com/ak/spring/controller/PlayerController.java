@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 import com.ak.spring.data.entity.Player;
 import com.ak.spring.data.repository.PlayerRepository;
@@ -22,7 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/controller/player")
+@RequestMapping("/controller/players")
 public final class PlayerController {
   public record PlayerRecord(@NonNull String firstName, @NonNull String surName, @NonNull String lastName,
                              @NonNull LocalDate birthDate, @NonNull Player.Gender gender) {
@@ -56,12 +55,13 @@ public final class PlayerController {
   @NonNull
   public ResponseEntity<Player> getPlayerByUUID(@PathVariable("uuid") @NonNull UUID uuid) {
     Player player = playerRepository.findByUUID(uuid);
-    if (player == null || Stream.of(player.getFirstName(), player.getSurName(), player.getLastName()).allMatch(String::isBlank)) {
-      return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    }
-    else {
-      return new ResponseEntity<>(player, HttpStatus.OK);
-    }
+    return player == null ? new ResponseEntity<>(HttpStatus.NO_CONTENT) : new ResponseEntity<>(player, HttpStatus.OK);
+  }
+
+  @GetMapping("/")
+  @NonNull
+  public ResponseEntity<List<Player>> players() {
+    return new ResponseEntity<>(playerRepository.findAllPlayers(), HttpStatus.OK);
   }
 
   @PostMapping("/")

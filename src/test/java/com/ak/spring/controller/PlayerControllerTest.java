@@ -1,6 +1,7 @@
 package com.ak.spring.controller;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -66,7 +67,9 @@ class PlayerControllerTest {
   @ParameterizedTest
   @MethodSource("player")
   void testCreatePlayer(@NonNull PlayerController.PlayerRecord playerRecord) throws Exception {
+    int size = players().size();
     assertNotNull(createPlayer(playerRecord));
+    assertThat(players()).hasSize(size + 1);
   }
 
   @ParameterizedTest
@@ -81,7 +84,7 @@ class PlayerControllerTest {
   void testInvalidUUID() throws Exception {
     assertNotNull(
         mvc.perform(MockMvcRequestBuilders
-                .get("/controller/player/%s".formatted(UUID.randomUUID())).accept(MediaType.APPLICATION_JSON))
+                .get("/controller/players/%s".formatted(UUID.randomUUID())).accept(MediaType.APPLICATION_JSON))
             .andDo(MockMvcResultHandlers.print())
             .andExpect(status().isNoContent())
             .andExpect(content().string(""))
@@ -91,6 +94,7 @@ class PlayerControllerTest {
   @ParameterizedTest
   @MethodSource("player")
   void testUpdatePlayer(@NonNull PlayerController.PlayerRecord playerRecord) throws Exception {
+    int size = players().size();
     Player player1 = createPlayer(playerRecord);
     PlayerController.PlayerRecord playerRecord2 = new PlayerController.PlayerRecord(
         playerRecord.firstName(), "V2", playerRecord.lastName(), LocalDate.parse("1981-07-03"), Player.Gender.MALE
@@ -98,16 +102,18 @@ class PlayerControllerTest {
     Player player2 = updatePlayer(player1.getUUID(), playerRecord2);
     assertThat(player1).isNotEqualTo(player2);
     assertThat(checkHistory(player1.getUUID(), playerRecord2, playerRecord)).hasSize(2);
+    assertThat(players()).hasSize(size + 1);
   }
 
   @ParameterizedTest
   @MethodSource("player")
   void testDeletePlayer(@NonNull PlayerController.PlayerRecord playerRecord) throws Exception {
+    int size = players().size();
     UUID uuid = createPlayer(playerRecord).getUUID();
     assertThat(checkHistory(uuid, playerRecord)).hasSize(1);
     assertNotNull(
         mvc.perform(MockMvcRequestBuilders
-                .delete("/controller/player/%s".formatted(uuid)))
+                .delete("/controller/players/%s".formatted(uuid)))
             .andDo(MockMvcResultHandlers.print())
             .andExpect(status().isAccepted())
             .andExpect(jsonPath("$.uuid", notNullValue()))
@@ -116,30 +122,38 @@ class PlayerControllerTest {
     assertThat(checkHistory(uuid, empty, playerRecord)).hasSize(2);
     assertNotNull(
         mvc.perform(MockMvcRequestBuilders
-                .get("/controller/player/%s".formatted(uuid)).accept(MediaType.APPLICATION_JSON))
+                .get("/controller/players/%s".formatted(uuid)).accept(MediaType.APPLICATION_JSON))
             .andDo(MockMvcResultHandlers.print())
             .andExpect(status().isNoContent())
             .andExpect(content().string(""))
     );
+    assertThat(players()).hasSize(size);
   }
 
   @NonNull
   private Player createPlayer(@NonNull PlayerController.PlayerRecord playerRecord) throws Exception {
-    return check(MockMvcRequestBuilders.post("/controller/player/")
+    return check(MockMvcRequestBuilders.post("/controller/players/")
             .content(mapper.writeValueAsString(playerRecord))
             .contentType(MediaType.APPLICATION_JSON),
         playerRecord
     );
   }
 
+  @NonNull
+  private List<Player> players() throws Exception {
+    MockHttpServletResponse response = mvc.perform(MockMvcRequestBuilders.get("/controller/players/").contentType(MediaType.APPLICATION_JSON))
+        .andReturn().getResponse();
+    return List.of(new ObjectMapper().reader().readValue(response.getContentAsString(), Player[].class));
+  }
+
   private Player getPlayerByUUID(@NonNull UUID uuid, @NonNull PlayerController.PlayerRecord playerRecord) throws Exception {
-    return check(MockMvcRequestBuilders.get("/controller/player/%s".formatted(uuid)).accept(MediaType.APPLICATION_JSON),
+    return check(MockMvcRequestBuilders.get("/controller/players/%s".formatted(uuid)).accept(MediaType.APPLICATION_JSON),
         playerRecord
     );
   }
 
   private Player updatePlayer(@NonNull UUID uuid, @NonNull PlayerController.PlayerRecord playerRecord) throws Exception {
-    return check(MockMvcRequestBuilders.put("/controller/player/%s".formatted(uuid))
+    return check(MockMvcRequestBuilders.put("/controller/players/%s".formatted(uuid))
             .content(mapper.writeValueAsString(playerRecord))
             .contentType(MediaType.APPLICATION_JSON),
         playerRecord
@@ -163,7 +177,7 @@ class PlayerControllerTest {
 
   private Player[] checkHistory(@NonNull UUID uuid, @NonNull PlayerController.PlayerRecord... records) throws Exception {
     ResultActions actions = mvc.perform(MockMvcRequestBuilders
-            .get("/controller/player/history/%s".formatted(uuid)).accept(MediaType.APPLICATION_JSON))
+            .get("/controller/players/history/%s".formatted(uuid)).accept(MediaType.APPLICATION_JSON))
         .andDo(MockMvcResultHandlers.print())
         .andExpect(status().isOk())
         .andExpect(jsonPath("$", hasSize(records.length)));

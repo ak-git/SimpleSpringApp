@@ -16,9 +16,11 @@ down: `docker-compose down`
 
 ## Use as
 
-[localhost:8080/controller/player/history/1c6cefa4-9622-40c7-8d5f-6223c5f4aa0d](localhost:8080/controller/player/history/1c6cefa4-9622-40c7-8d5f-6223c5f4aa0d)
+[localhost:8080/controller/players/](localhost:8080/controller/players/)
 
-[localhost:8080/controller/player/1c6cefa4-9622-40c7-8d5f-6223c5f4aa0d](localhost:8080/controller/player/1c6cefa4-9622-40c7-8d5f-6223c5f4aa0d)
+[localhost:8080/controller/players/1c6cefa4-9622-40c7-8d5f-6223c5f4aa0d](localhost:8080/controller/players/1c6cefa4-9622-40c7-8d5f-6223c5f4aa0d)
+
+[localhost:8080/controller/players/history/1c6cefa4-9622-40c7-8d5f-6223c5f4aa0d](localhost:8080/controller/players/history/1c6cefa4-9622-40c7-8d5f-6223c5f4aa0d)
 
 `$ curl localhost:8080`
 

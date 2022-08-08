@@ -24,6 +24,11 @@ public interface PlayerRepository extends JpaRepository<Player, RevisionableId> 
    * @param uuid identification
    * @return single Player
    */
-  @Query("select a from Player a left outer join Player b ON a.uuid = b.uuid AND a.revision < b.revision where b.uuid is null and a.uuid = :uuid")
+  @Query("select a from Player a left outer join Player b ON a.uuid = b.uuid AND a.revision < b.revision where b.uuid is null and a.uuid = :uuid " +
+      "and (NULLIF(a.firstName, '') IS NOT NULL and NULLIF(a.surName, '') IS NOT NULL) and NULLIF(a.lastName, '') IS NOT NULL")
   Player findByUUID(@Param("uuid") @NonNull UUID uuid);
+
+  @Query("select a from Player a left outer join Player b ON a.uuid = b.uuid AND a.revision < b.revision where b.uuid is null " +
+      "and (NULLIF(a.firstName, '') IS NOT NULL and NULLIF(a.surName, '') IS NOT NULL) and NULLIF(a.lastName, '') IS NOT NULL")
+  List<Player> findAllPlayers();
 }

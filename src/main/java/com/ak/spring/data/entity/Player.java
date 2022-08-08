@@ -27,18 +27,6 @@ public final class Player {
     MALE, FEMALE
   }
 
-  private static class GenderConverter implements AttributeConverter<Gender, String> {
-    @Override
-    public String convertToDatabaseColumn(@NonNull Gender attribute) {
-      return attribute.name();
-    }
-
-    @Override
-    public Gender convertToEntityAttribute(@NonNull String dbData) {
-      return Gender.valueOf(dbData);
-    }
-  }
-
   @Id
   @Type(type = "uuid-char")
   private UUID uuid;
@@ -54,6 +42,18 @@ public final class Player {
   private LocalDate birthDate = LocalDate.EPOCH;
   @Convert(converter = GenderConverter.class)
   private Gender gender = Gender.MALE;
+
+  private static class GenderConverter implements AttributeConverter<Gender, String> {
+    @Override
+    public String convertToDatabaseColumn(@NonNull Gender attribute) {
+      return attribute.name();
+    }
+
+    @Override
+    public Gender convertToEntityAttribute(@NonNull String dbData) {
+      return Gender.valueOf(dbData);
+    }
+  }
 
   public Player() {
     this(UUID.randomUUID());

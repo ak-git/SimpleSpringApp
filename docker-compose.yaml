@@ -67,6 +67,7 @@ services:
       - db-net
     restart: on-failure
     environment:
+      - WAIT_HOSTS=pgdb:5432, pgadmin:80, adminer:8080
       - SPRING_DATASOURCE_URL=jdbc:postgresql://pgdb:5432/db
       - SPRING_DATASOURCE_USERNAME=pguser
       - SPRING_DATASOURCE_PASSWORD=pgpass

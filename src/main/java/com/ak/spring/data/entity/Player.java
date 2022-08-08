@@ -5,6 +5,8 @@ import java.time.ZonedDateTime;
 import java.util.Objects;
 import java.util.UUID;
 
+import javax.persistence.AttributeConverter;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -25,6 +27,18 @@ public final class Player {
     MALE, FEMALE
   }
 
+  private static class GenderConverter implements AttributeConverter<Gender, String> {
+    @Override
+    public String convertToDatabaseColumn(@NonNull Gender attribute) {
+      return attribute.name();
+    }
+
+    @Override
+    public Gender convertToEntityAttribute(@NonNull String dbData) {
+      return Gender.valueOf(dbData);
+    }
+  }
+
   @Id
   @Type(type = "uuid-char")
   private UUID uuid;
@@ -38,6 +52,7 @@ public final class Player {
   @JsonDeserialize(using = LocalDateDeserializer.class)
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
   private LocalDate birthDate = LocalDate.EPOCH;
+  @Convert(converter = GenderConverter.class)
   private Gender gender = Gender.MALE;
 
   public Player() {

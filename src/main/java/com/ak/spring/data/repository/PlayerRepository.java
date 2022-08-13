@@ -25,7 +25,7 @@ public interface PlayerRepository extends JpaRepository<Player, RevisionableId> 
    * @return single Player
    */
   @Query("select a from Player a left outer join Player b ON a.uuid = b.uuid AND a.revision < b.revision where b.uuid is null and a.uuid = :uuid " +
-      "and (NULLIF(a.firstName, '') IS NOT NULL and NULLIF(a.surName, '') IS NOT NULL) and NULLIF(a.lastName, '') IS NOT NULL")
+      "and (NULLIF(a.firstName, '') IS NOT NULL or NULLIF(a.surName, '') IS NOT NULL or NULLIF(a.lastName, '') IS NOT NULL)")
   Player findByUUID(@Param("uuid") @NonNull UUID uuid);
 
   /**
@@ -35,6 +35,6 @@ public interface PlayerRepository extends JpaRepository<Player, RevisionableId> 
    * @return list of the latest Player's versions
    */
   @Query("select a from Player a left outer join Player b ON a.uuid = b.uuid AND a.revision < b.revision where b.uuid is null " +
-      "and (NULLIF(a.firstName, '') IS NOT NULL and NULLIF(a.surName, '') IS NOT NULL) and NULLIF(a.lastName, '') IS NOT NULL")
+      "and (NULLIF(a.firstName, '') IS NOT NULL or NULLIF(a.surName, '') IS NOT NULL or NULLIF(a.lastName, '') IS NOT NULL)")
   List<Player> findAllPlayers();
 }

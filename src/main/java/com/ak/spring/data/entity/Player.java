@@ -3,6 +3,7 @@ package com.ak.spring.data.entity;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 import javax.persistence.AttributeConverter;
@@ -45,8 +46,8 @@ public final class Player {
 
   private static class GenderConverter implements AttributeConverter<Gender, String> {
     @Override
-    public String convertToDatabaseColumn(@NonNull Gender attribute) {
-      return attribute.name();
+    public String convertToDatabaseColumn(Gender attribute) {
+      return Optional.ofNullable(attribute).orElse(Gender.MALE).name();
     }
 
     @Override

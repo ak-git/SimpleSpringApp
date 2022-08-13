@@ -26,7 +26,7 @@ class PlayerControllerIntegrationTest {
   void index() {
     int size = template.getForObject("/controller/players/", Player[].class).length;
     PlayerController.PlayerRecord playerRecord = new PlayerController.PlayerRecord(
-        "Alexander", "V", "K", LocalDate.parse("1981-07-03"), Player.Gender.MALE);
+        "Alexander", "", "", LocalDate.parse("1981-07-03"), Player.Gender.MALE);
     Player player = template.postForObject("/controller/players/", playerRecord, Player.class);
     checkEquals(player, playerRecord);
     assertThat(template.getForObject("/controller/players/", Player[].class)).hasSize(size + 1);

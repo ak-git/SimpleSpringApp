@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -46,9 +47,10 @@ public final class PlayerController {
   }
 
   @GetMapping("/history/{uuid}")
+  @ResponseStatus(HttpStatus.OK)
   @NonNull
-  public ResponseEntity<List<Player>> getPlayerHistoryByUUID(@PathVariable("uuid") @NonNull UUID uuid) {
-    return new ResponseEntity<>(playerRepository.historyForUUID(uuid), HttpStatus.OK);
+  public List<Player> getPlayerHistoryByUUID(@PathVariable("uuid") @NonNull UUID uuid) {
+    return playerRepository.historyForUUID(uuid);
   }
 
   @GetMapping("/{uuid}")
@@ -59,23 +61,27 @@ public final class PlayerController {
   }
 
   @GetMapping("/")
+  @ResponseStatus(HttpStatus.OK)
   @NonNull
-  public ResponseEntity<List<Player>> players() {
-    return new ResponseEntity<>(playerRepository.findAllPlayers(), HttpStatus.OK);
+  public List<Player> players() {
+    return playerRepository.findAllPlayers();
   }
 
   @PostMapping("/")
-  public ResponseEntity<Player> createPlayer(@RequestBody @NonNull PlayerRecord p) {
-    return new ResponseEntity<>(playerRepository.save(p.toPlayer(Player::new)), HttpStatus.OK);
+  @ResponseStatus(HttpStatus.OK)
+  public Player createPlayer(@RequestBody @NonNull PlayerRecord p) {
+    return playerRepository.save(p.toPlayer(Player::new));
   }
 
   @PutMapping("/{uuid}")
-  public ResponseEntity<Player> updatePlayer(@PathVariable("uuid") @NonNull UUID uuid, @RequestBody @NonNull PlayerRecord p) {
-    return new ResponseEntity<>(playerRepository.save(p.toPlayer(() -> new Player(uuid))), HttpStatus.OK);
+  @ResponseStatus(HttpStatus.OK)
+  public Player updatePlayer(@PathVariable("uuid") @NonNull UUID uuid, @RequestBody @NonNull PlayerRecord p) {
+    return playerRepository.save(p.toPlayer(() -> new Player(uuid)));
   }
 
   @DeleteMapping("/{uuid}")
-  public ResponseEntity<Player> deletePlayer(@PathVariable("uuid") @NonNull UUID uuid) {
-    return new ResponseEntity<>(playerRepository.save(new Player(uuid)), HttpStatus.ACCEPTED);
+  @ResponseStatus(HttpStatus.ACCEPTED)
+  public Player deletePlayer(@PathVariable("uuid") @NonNull UUID uuid) {
+    return playerRepository.save(new Player(uuid));
   }
 }

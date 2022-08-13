@@ -22,27 +22,27 @@ down: `docker-compose down`
 
 [localhost:8080/controller/players/history/1c6cefa4-9622-40c7-8d5f-6223c5f4aa0d](localhost:8080/controller/players/history/1c6cefa4-9622-40c7-8d5f-6223c5f4aa0d)
 
-**List all players:**
+### List all players:
 
 `$ curl localhost:8080/controller/players/`
 
-**Create new player:**
+### Create new player:
 
 `$ curl -X POST localhost:8080/controller/players/ -H "Content-type:application/json" -d {\"lastName\":\"Doo\"}`
 
-**Update player:**
+### Update player:
 
 `$ curl -X PUT localhost:8080/controller/players/ddba8655-4c9b-4760-81c0-e32448866550 -H "Content-type:application/json" -d {\"lastName\":\"Doo2\"}`
 
-**Find player by id:**
+### Find player by id:
 
 `$ curl localhost:8080/controller/players/ddba8655-4c9b-4760-81c0-e32448866550`
 
-**History for player by id:**
+### History for player by id:
 
 `$ curl localhost:8080/controller/players/history/ddba8655-4c9b-4760-81c0-e32448866550`
 
-**Delete player by id:**
+### Delete player by id:
 
 `curl -X DELETE localhost:8080/controller/players/ddba8655-4c9b-4760-81c0-e32448866550`
 

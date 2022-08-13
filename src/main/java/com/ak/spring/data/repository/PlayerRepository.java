@@ -35,6 +35,7 @@ public interface PlayerRepository extends JpaRepository<Player, RevisionableId> 
    * @return list of the latest Player's versions
    */
   @Query("select a from Player a left outer join Player b ON a.uuid = b.uuid AND a.revision < b.revision where b.uuid is null " +
-      "and (NULLIF(a.firstName, '') IS NOT NULL or NULLIF(a.surName, '') IS NOT NULL or NULLIF(a.lastName, '') IS NOT NULL)")
+      "and (NULLIF(a.firstName, '') IS NOT NULL or NULLIF(a.surName, '') IS NOT NULL or NULLIF(a.lastName, '') IS NOT NULL) " +
+      "order by a.revision desc nulls last")
   List<Player> findAllPlayers();
 }

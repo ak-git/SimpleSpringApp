@@ -2,11 +2,13 @@ package com.ak.spring.controller;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Supplier;
 
 import com.ak.spring.data.entity.Player;
 import com.ak.spring.data.repository.PlayerRepository;
+import com.ak.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,16 +26,16 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/controller/players")
 public final class PlayerController {
-  public record PlayerRecord(@NonNull String firstName, @NonNull String surName, @NonNull String lastName,
-                             @NonNull LocalDate birthDate, @NonNull Player.Gender gender) {
+  public record PlayerRecord(String firstName, String surName, String lastName,
+                             LocalDate birthDate, Player.Gender gender) {
     @NonNull
     Player toPlayer(@NonNull Supplier<Player> p) {
       Player player = p.get();
-      player.setFirstName(firstName);
-      player.setSurName(surName);
-      player.setLastName(lastName);
-      player.setBirthDate(birthDate);
-      player.setGender(gender);
+      player.setFirstName(Optional.ofNullable(firstName).orElse(Strings.EMPTY));
+      player.setSurName(Optional.ofNullable(surName).orElse(Strings.EMPTY));
+      player.setLastName(Optional.ofNullable(lastName).orElse(Strings.EMPTY));
+      player.setBirthDate(Optional.ofNullable(birthDate).orElse(LocalDate.EPOCH));
+      player.setGender(Optional.ofNullable(gender).orElse(Player.Gender.MALE));
       return player;
     }
   }

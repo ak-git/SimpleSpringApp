@@ -15,6 +15,7 @@ import javax.persistence.Id;
 import javax.persistence.IdClass;
 
 import com.ak.spring.data.id.RevisionableId;
+import com.ak.util.Strings;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
@@ -35,9 +36,9 @@ public final class Player {
   @GeneratedValue(strategy = GenerationType.SEQUENCE)
   private long revision;
   private ZonedDateTime created;
-  private String firstName = "";
-  private String surName = "";
-  private String lastName = "";
+  private String firstName = Strings.EMPTY;
+  private String surName = Strings.EMPTY;
+  private String lastName = Strings.EMPTY;
   @JsonDeserialize(using = LocalDateDeserializer.class)
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
   private LocalDate birthDate = LocalDate.EPOCH;

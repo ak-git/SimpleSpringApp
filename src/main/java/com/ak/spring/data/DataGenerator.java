@@ -11,6 +11,7 @@ import java.util.stream.IntStream;
 
 import com.ak.spring.data.entity.Player;
 import com.ak.spring.data.repository.PlayerRepository;
+import com.ak.util.Strings;
 import com.github.javafaker.Faker;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
@@ -33,7 +34,7 @@ public class DataGenerator {
             .mapToObj(value -> {
               Player entity = new Player();
               entity.setFirstName(faker.name().firstName());
-              entity.setSurName("");
+              entity.setSurName(Strings.EMPTY);
               entity.setLastName(faker.name().lastName());
               entity.setBirthDate(LocalDate.of(RANDOM.nextInt(1991, 2001),
                   Month.of(RANDOM.nextInt(Month.JANUARY.ordinal(), Month.DECEMBER.ordinal()) + 1),

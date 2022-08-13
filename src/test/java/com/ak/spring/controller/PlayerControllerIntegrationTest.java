@@ -4,6 +4,7 @@ import java.time.LocalDate;
 
 import com.ak.spring.Application;
 import com.ak.spring.data.entity.Player;
+import com.ak.util.Strings;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
@@ -26,7 +27,7 @@ class PlayerControllerIntegrationTest {
   void index() {
     int size = template.getForObject("/controller/players/", Player[].class).length;
     PlayerController.PlayerRecord playerRecord = new PlayerController.PlayerRecord(
-        "Alexander", "", "", LocalDate.parse("1981-07-03"), Player.Gender.MALE);
+        "Alexander", Strings.EMPTY, Strings.EMPTY, LocalDate.parse("1981-07-03"), Player.Gender.MALE);
     Player player = template.postForObject("/controller/players/", playerRecord, Player.class);
     checkEquals(player, playerRecord);
     assertThat(template.getForObject("/controller/players/", Player[].class)).hasSize(size + 1);

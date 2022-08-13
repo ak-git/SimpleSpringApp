@@ -8,6 +8,7 @@ import java.util.stream.Stream;
 import com.ak.spring.Application;
 import com.ak.spring.data.entity.Player;
 import com.ak.spring.data.repository.PlayerRepository;
+import com.ak.util.Strings;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -96,7 +97,7 @@ class PlayerControllerTest {
                 .get("/controller/players/%s".formatted(UUID.randomUUID())).accept(MediaType.APPLICATION_JSON))
             .andDo(MockMvcResultHandlers.print())
             .andExpect(status().isNoContent())
-            .andExpect(content().string(""))
+            .andExpect(content().string(Strings.EMPTY))
     );
   }
 
@@ -127,14 +128,14 @@ class PlayerControllerTest {
             .andExpect(status().isAccepted())
             .andExpect(jsonPath("$.uuid", notNullValue()))
     );
-    var empty = new PlayerController.PlayerRecord("", "", "", LocalDate.EPOCH, Player.Gender.MALE);
+    var empty = new PlayerController.PlayerRecord(Strings.EMPTY, Strings.EMPTY, Strings.EMPTY, LocalDate.EPOCH, Player.Gender.MALE);
     assertThat(checkHistory(uuid, empty, playerRecord)).hasSize(2);
     assertNotNull(
         mvc.perform(MockMvcRequestBuilders
                 .get("/controller/players/%s".formatted(uuid)).accept(MediaType.APPLICATION_JSON))
             .andDo(MockMvcResultHandlers.print())
             .andExpect(status().isNoContent())
-            .andExpect(content().string(""))
+            .andExpect(content().string(Strings.EMPTY))
     );
     assertThat(players()).hasSize(size);
   }

@@ -86,7 +86,7 @@ class PlayerControllerTest {
   }
 
   private void checkUnauthorized(@NonNull MockHttpServletRequestBuilder requestBuilder) {
-    assertThatNoException().isThrownBy(() -> mvc.perform(requestBuilder).andDo(print()).andExpect(status().isUnauthorized()));
+    assertThatNoException().isThrownBy(() -> assertNotNull(mvc.perform(requestBuilder).andDo(print()).andExpect(status().isUnauthorized())));
   }
 
   @ParameterizedTest

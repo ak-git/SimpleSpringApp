@@ -10,6 +10,10 @@ module com.ak.spring {
   requires spring.web;
   requires spring.data.jpa;
   requires spring.data.commons;
+  requires spring.security.core;
+  requires spring.security.config;
+  requires spring.security.web;
+  requires spring.security.crypto;
   requires org.hibernate.orm.core;
   requires javafaker;
   requires com.fasterxml.jackson.databind;
@@ -17,6 +21,7 @@ module com.ak.spring {
   requires org.apache.tomcat.embed.core;
 
   opens com.ak.spring to spring.core, com.fasterxml.jackson.databind;
+  opens com.ak.spring.security to spring.core, spring.beans, spring.context;
   opens com.ak.spring.data.entity to spring.core, org.hibernate.orm.core, com.fasterxml.jackson.databind;
   opens com.ak.spring.data to spring.core;
   opens com.ak.spring.data.id to spring.core, spring.beans, org.hibernate.orm.core;

@@ -4,6 +4,7 @@ import java.time.LocalDate;
 
 import com.ak.spring.Application;
 import com.ak.spring.data.entity.Player;
+import com.ak.spring.security.SpringSecurityConfig;
 import com.ak.util.Strings;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +17,7 @@ import org.springframework.lang.NonNull;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-@SpringBootTest(classes = {Application.class, PlayerController.class}, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(classes = {Application.class, PlayerController.class, SpringSecurityConfig.class}, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @EnableJpaRepositories(basePackages = "com.ak.spring.data.repository")
 @EntityScan(basePackages = "com.ak.spring.data.entity")
 class PlayerControllerIntegrationTest {
@@ -25,28 +26,36 @@ class PlayerControllerIntegrationTest {
 
   @Test
   void index() {
-    int size = template.getForObject("/controller/players/", Player[].class).length;
+    int size = template.withBasicAuth("user", "password")
+        .getForObject("/controller/players/", Player[].class).length;
     PlayerController.PlayerRecord playerRecord = new PlayerController.PlayerRecord(
         "Alexander", Strings.EMPTY, Strings.EMPTY, LocalDate.parse("1981-07-03"), Player.Gender.MALE);
-    Player player = template.postForObject("/controller/players/", playerRecord, Player.class);
+    Player player = template.withBasicAuth("user", "password")
+        .postForObject("/controller/players/", playerRecord, Player.class);
     checkEquals(player, playerRecord);
-    assertThat(template.getForObject("/controller/players/", Player[].class)).hasSize(size + 1);
+    assertThat(template.withBasicAuth("user", "password")
+        .getForObject("/controller/players/", Player[].class)).hasSize(size + 1);
 
     PlayerController.PlayerRecord playerRecord2 = new PlayerController.PlayerRecord(
         "Alexander", "V2", "K2", LocalDate.parse("1981-07-03"), Player.Gender.MALE);
-    template.put("/controller/players/%s".formatted(player.getUUID()), playerRecord2);
-    Player player2 = template.getForObject("/controller/players/%s".formatted(player.getUUID()), Player.class);
+    template.withBasicAuth("user", "password")
+        .put("/controller/players/%s".formatted(player.getUUID()), playerRecord2);
+    Player player2 = template.withBasicAuth("user", "password")
+        .getForObject("/controller/players/%s".formatted(player.getUUID()), Player.class);
     checkEquals(player2, playerRecord2);
     assertThat(player2).isNotEqualTo(player);
-    assertThat(template.getForObject("/controller/players/", Player[].class)).hasSize(size + 1);
+    assertThat(template.withBasicAuth("user", "password")
+        .getForObject("/controller/players/", Player[].class)).hasSize(size + 1);
 
-    template.delete("/controller/players/%s".formatted(player.getUUID()));
-    Player[] history = template.getForObject("/controller/players/history/%s".formatted(player.getUUID()), Player[].class);
+    template.withBasicAuth("user", "password").delete("/controller/players/%s".formatted(player.getUUID()));
+    Player[] history = template.withBasicAuth("admin", "password")
+        .getForObject("/controller/players/history/%s".formatted(player.getUUID()), Player[].class);
     assertThat(history).hasSize(3);
     for (int i = 1; i < history.length; i++) {
       assertThat(history[i].getRevision()).isLessThan(history[i - 1].getRevision());
     }
-    assertThat(template.getForObject("/controller/players/", Player[].class)).hasSize(size);
+    assertThat(template.withBasicAuth("user", "password")
+        .getForObject("/controller/players/", Player[].class)).hasSize(size);
   }
 
   void checkEquals(@NonNull Player player, @NonNull PlayerController.PlayerRecord playerRecord) {

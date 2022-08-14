@@ -8,12 +8,14 @@ import java.util.stream.Stream;
 import com.ak.spring.Application;
 import com.ak.spring.data.entity.Player;
 import com.ak.spring.data.repository.PlayerRepository;
+import com.ak.spring.security.SpringSecurityConfig;
 import com.ak.util.Strings;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -22,24 +24,26 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.http.MediaType;
 import org.springframework.lang.NonNull;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest(classes = {Application.class, PlayerController.class})
+@SpringBootTest(classes = {Application.class, PlayerController.class, SpringSecurityConfig.class})
 @AutoConfigureMockMvc
 @EnableJpaRepositories(basePackages = "com.ak.spring.data.repository")
 @EntityScan(basePackages = "com.ak.spring.data.entity")
@@ -58,7 +62,36 @@ class PlayerControllerTest {
   }
 
   @ParameterizedTest
+  @ValueSource(strings = {"/controller/players/history/", "/controller/players/"})
+  void testNoLoginGet(@NonNull String address) {
+    checkUnauthorized(MockMvcRequestBuilders.get(address).accept(MediaType.APPLICATION_JSON));
+  }
+
+  @ParameterizedTest
   @MethodSource("player")
+  void testNoLoginPostPut(@NonNull PlayerController.PlayerRecord playerRecord) throws Exception {
+    checkUnauthorized(MockMvcRequestBuilders.post("/controller/players/")
+        .content(mapper.writeValueAsString(playerRecord))
+        .contentType(MediaType.APPLICATION_JSON)
+    );
+    checkUnauthorized(MockMvcRequestBuilders.put("/controller/players/")
+        .content(mapper.writeValueAsString(playerRecord))
+        .contentType(MediaType.APPLICATION_JSON)
+    );
+  }
+
+  @Test
+  void testNoLoginPostDelete() {
+    checkUnauthorized(MockMvcRequestBuilders.delete("/controller/players/"));
+  }
+
+  private void checkUnauthorized(@NonNull MockHttpServletRequestBuilder requestBuilder) {
+    assertThatNoException().isThrownBy(() -> mvc.perform(requestBuilder).andDo(print()).andExpect(status().isUnauthorized()));
+  }
+
+  @ParameterizedTest
+  @MethodSource("player")
+  @WithMockUser(roles = {"ADMIN", "USER"})
   void testGetPlayerHistoryByUUID(@NonNull PlayerController.PlayerRecord playerRecord) throws Exception {
     Player player = createPlayer(playerRecord);
     PlayerController.PlayerRecord second = new PlayerController.PlayerRecord(
@@ -76,6 +109,7 @@ class PlayerControllerTest {
 
   @ParameterizedTest
   @MethodSource("player")
+  @WithMockUser("USER")
   void testCreatePlayer(@NonNull PlayerController.PlayerRecord playerRecord) throws Exception {
     int size = players().size();
     assertNotNull(createPlayer(playerRecord));
@@ -84,6 +118,7 @@ class PlayerControllerTest {
 
   @ParameterizedTest
   @MethodSource("player")
+  @WithMockUser("USER")
   void testGetPlayer(@NonNull PlayerController.PlayerRecord playerRecord) throws Exception {
     Player player1 = createPlayer(playerRecord);
     Player player2 = getPlayerByUUID(player1.getUUID(), playerRecord);
@@ -91,11 +126,12 @@ class PlayerControllerTest {
   }
 
   @Test
+  @WithMockUser("USER")
   void testInvalidUUID() throws Exception {
     assertNotNull(
         mvc.perform(MockMvcRequestBuilders
                 .get("/controller/players/%s".formatted(UUID.randomUUID())).accept(MediaType.APPLICATION_JSON))
-            .andDo(MockMvcResultHandlers.print())
+            .andDo(print())
             .andExpect(status().isNoContent())
             .andExpect(content().string(Strings.EMPTY))
     );
@@ -103,6 +139,7 @@ class PlayerControllerTest {
 
   @ParameterizedTest
   @MethodSource("player")
+  @WithMockUser(roles = {"ADMIN", "USER"})
   void testUpdatePlayer(@NonNull PlayerController.PlayerRecord playerRecord) throws Exception {
     int size = players().size();
     Player player1 = createPlayer(playerRecord);
@@ -117,6 +154,7 @@ class PlayerControllerTest {
 
   @ParameterizedTest
   @MethodSource("player")
+  @WithMockUser(roles = {"ADMIN", "USER"})
   void testDeletePlayer(@NonNull PlayerController.PlayerRecord playerRecord) throws Exception {
     int size = players().size();
     UUID uuid = createPlayer(playerRecord).getUUID();
@@ -124,7 +162,7 @@ class PlayerControllerTest {
     assertNotNull(
         mvc.perform(MockMvcRequestBuilders
                 .delete("/controller/players/%s".formatted(uuid)))
-            .andDo(MockMvcResultHandlers.print())
+            .andDo(print())
             .andExpect(status().isAccepted())
             .andExpect(jsonPath("$.uuid", notNullValue()))
     );
@@ -133,7 +171,7 @@ class PlayerControllerTest {
     assertNotNull(
         mvc.perform(MockMvcRequestBuilders
                 .get("/controller/players/%s".formatted(uuid)).accept(MediaType.APPLICATION_JSON))
-            .andDo(MockMvcResultHandlers.print())
+            .andDo(print())
             .andExpect(status().isNoContent())
             .andExpect(content().string(Strings.EMPTY))
     );
@@ -151,7 +189,8 @@ class PlayerControllerTest {
 
   @NonNull
   private List<Player> players() throws Exception {
-    MockHttpServletResponse response = mvc.perform(MockMvcRequestBuilders.get("/controller/players/").contentType(MediaType.APPLICATION_JSON))
+    MockHttpServletResponse response = mvc.perform(MockMvcRequestBuilders.get("/controller/players/")
+            .contentType(MediaType.APPLICATION_JSON))
         .andReturn().getResponse();
     return List.of(new ObjectMapper().reader().readValue(response.getContentAsString(), Player[].class));
   }
@@ -170,9 +209,10 @@ class PlayerControllerTest {
     );
   }
 
-  private Player check(MockHttpServletRequestBuilder requestBuilder, @NonNull PlayerController.PlayerRecord playerRecord) throws Exception {
+  private Player check(@NonNull MockHttpServletRequestBuilder requestBuilder,
+                       @NonNull PlayerController.PlayerRecord playerRecord) throws Exception {
     MockHttpServletResponse response = mvc.perform(requestBuilder)
-        .andDo(MockMvcResultHandlers.print())
+        .andDo(print())
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.uuid", notNullValue()))
         .andExpect(jsonPath("$.firstName", is(playerRecord.firstName())))
@@ -188,7 +228,7 @@ class PlayerControllerTest {
   private Player[] checkHistory(@NonNull UUID uuid, @NonNull PlayerController.PlayerRecord... records) throws Exception {
     ResultActions actions = mvc.perform(MockMvcRequestBuilders
             .get("/controller/players/history/%s".formatted(uuid)).accept(MediaType.APPLICATION_JSON))
-        .andDo(MockMvcResultHandlers.print())
+        .andDo(print())
         .andExpect(status().isOk())
         .andExpect(jsonPath("$", hasSize(records.length)));
 

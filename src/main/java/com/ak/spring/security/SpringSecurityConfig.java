@@ -28,8 +28,8 @@ public class SpringSecurityConfig {
         .antMatchers(HttpMethod.PUT, USER_PATTERN).hasRole("USER")
         .antMatchers(HttpMethod.DELETE, USER_PATTERN).hasRole("USER")
         .and()
-        .csrf().disable()
-        .formLogin().disable();
+        .formLogin().disable()
+        .csrf().ignoringAntMatchers(USER_PATTERN);
     return http.build();
   }
 

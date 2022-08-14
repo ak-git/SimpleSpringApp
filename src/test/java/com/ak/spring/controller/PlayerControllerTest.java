@@ -32,7 +32,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -63,30 +62,30 @@ class PlayerControllerTest {
 
   @ParameterizedTest
   @ValueSource(strings = {"/controller/players/history/", "/controller/players/"})
-  void testNoLoginGet(@NonNull String address) {
-    checkUnauthorized(MockMvcRequestBuilders.get(address).accept(MediaType.APPLICATION_JSON));
+  void testNoLoginGet(@NonNull String address) throws Exception {
+    assertNotNull(checkUnauthorized(MockMvcRequestBuilders.get(address).accept(MediaType.APPLICATION_JSON)));
   }
 
   @ParameterizedTest
   @MethodSource("player")
   void testNoLoginPostPut(@NonNull PlayerController.PlayerRecord playerRecord) throws Exception {
-    checkUnauthorized(MockMvcRequestBuilders.post("/controller/players/")
+    assertNotNull(checkUnauthorized(MockMvcRequestBuilders.post("/controller/players/")
         .content(mapper.writeValueAsString(playerRecord))
         .contentType(MediaType.APPLICATION_JSON)
-    );
-    checkUnauthorized(MockMvcRequestBuilders.put("/controller/players/")
+    ));
+    assertNotNull(checkUnauthorized(MockMvcRequestBuilders.put("/controller/players/")
         .content(mapper.writeValueAsString(playerRecord))
         .contentType(MediaType.APPLICATION_JSON)
-    );
+    ));
   }
 
   @Test
-  void testNoLoginPostDelete() {
-    checkUnauthorized(MockMvcRequestBuilders.delete("/controller/players/"));
+  void testNoLoginPostDelete() throws Exception {
+    assertNotNull(checkUnauthorized(MockMvcRequestBuilders.delete("/controller/players/")));
   }
 
-  private void checkUnauthorized(@NonNull MockHttpServletRequestBuilder requestBuilder) {
-    assertThatNoException().isThrownBy(() -> assertNotNull(mvc.perform(requestBuilder).andDo(print()).andExpect(status().isUnauthorized())));
+  private ResultActions checkUnauthorized(@NonNull MockHttpServletRequestBuilder requestBuilder) throws Exception {
+    return mvc.perform(requestBuilder).andDo(print()).andExpect(status().isUnauthorized());
   }
 
   @ParameterizedTest

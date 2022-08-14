@@ -37,6 +37,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -85,7 +86,7 @@ class PlayerControllerTest {
   }
 
   private ResultActions checkUnauthorized(@NonNull MockHttpServletRequestBuilder requestBuilder) throws Exception {
-    return mvc.perform(requestBuilder).andDo(print()).andExpect(status().isUnauthorized());
+    return mvc.perform(requestBuilder.with(csrf())).andDo(print()).andExpect(status().isUnauthorized());
   }
 
   @ParameterizedTest
@@ -160,7 +161,7 @@ class PlayerControllerTest {
     assertThat(checkHistory(uuid, playerRecord)).hasSize(1);
     assertNotNull(
         mvc.perform(MockMvcRequestBuilders
-                .delete("/controller/players/%s".formatted(uuid)))
+                .delete("/controller/players/%s".formatted(uuid)).with(csrf()))
             .andDo(print())
             .andExpect(status().isAccepted())
             .andExpect(jsonPath("$.uuid", notNullValue()))
@@ -181,7 +182,7 @@ class PlayerControllerTest {
   private Player createPlayer(@NonNull PlayerController.PlayerRecord playerRecord) throws Exception {
     return check(MockMvcRequestBuilders.post("/controller/players/")
             .content(mapper.writeValueAsString(playerRecord))
-            .contentType(MediaType.APPLICATION_JSON),
+            .contentType(MediaType.APPLICATION_JSON).with(csrf()),
         playerRecord
     );
   }
@@ -189,7 +190,7 @@ class PlayerControllerTest {
   @NonNull
   private List<Player> players() throws Exception {
     MockHttpServletResponse response = mvc.perform(MockMvcRequestBuilders.get("/controller/players/")
-            .contentType(MediaType.APPLICATION_JSON))
+            .contentType(MediaType.APPLICATION_JSON).with(csrf()))
         .andReturn().getResponse();
     return List.of(new ObjectMapper().reader().readValue(response.getContentAsString(), Player[].class));
   }
@@ -210,7 +211,7 @@ class PlayerControllerTest {
 
   private Player check(@NonNull MockHttpServletRequestBuilder requestBuilder,
                        @NonNull PlayerController.PlayerRecord playerRecord) throws Exception {
-    MockHttpServletResponse response = mvc.perform(requestBuilder)
+    MockHttpServletResponse response = mvc.perform(requestBuilder.with(csrf()))
         .andDo(print())
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.uuid", notNullValue()))
@@ -226,7 +227,7 @@ class PlayerControllerTest {
 
   private Player[] checkHistory(@NonNull UUID uuid, @NonNull PlayerController.PlayerRecord... records) throws Exception {
     ResultActions actions = mvc.perform(MockMvcRequestBuilders
-            .get("/controller/players/history/%s".formatted(uuid)).accept(MediaType.APPLICATION_JSON))
+            .get("/controller/players/history/%s".formatted(uuid)).accept(MediaType.APPLICATION_JSON).with(csrf()))
         .andDo(print())
         .andExpect(status().isOk())
         .andExpect(jsonPath("$", hasSize(records.length)));

@@ -10,11 +10,18 @@ import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.csrf.CsrfTokenRepository;
 
 @EnableWebSecurity
 @Configuration
 public class SpringSecurityConfig {
   private static final String USER_PATTERN = "/controller/players/**";
+
+  @Bean
+  public CsrfTokenRepository csrfTokenRepository() {
+    return CookieCsrfTokenRepository.withHttpOnlyFalse();
+  }
 
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -29,7 +36,7 @@ public class SpringSecurityConfig {
         .antMatchers(HttpMethod.DELETE, USER_PATTERN).hasRole("USER")
         .and()
         .formLogin().disable()
-        .csrf().ignoringAntMatchers(USER_PATTERN);
+        .csrf().csrfTokenRepository(csrfTokenRepository());
     return http.build();
   }
 

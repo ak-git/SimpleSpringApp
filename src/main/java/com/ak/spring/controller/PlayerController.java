@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -40,7 +41,6 @@ public final class PlayerController {
     }
   }
 
-  @NonNull
   private final PlayerRepository playerRepository;
 
   @Autowired
@@ -49,13 +49,14 @@ public final class PlayerController {
   }
 
   @GetMapping("/history/{uuid}")
-  @ResponseStatus(HttpStatus.OK)
+  @ResponseBody
   @NonNull
   public List<Player> getPlayerHistoryByUUID(@PathVariable("uuid") @NonNull UUID uuid) {
     return playerRepository.historyForUUID(uuid);
   }
 
   @GetMapping("/{uuid}")
+  @ResponseBody
   @NonNull
   public ResponseEntity<Player> getPlayerByUUID(@PathVariable("uuid") @NonNull UUID uuid) {
     Player player = playerRepository.findByUUID(uuid);
@@ -63,7 +64,7 @@ public final class PlayerController {
   }
 
   @GetMapping("/")
-  @ResponseStatus(HttpStatus.OK)
+  @ResponseBody
   @NonNull
   public List<Player> players() {
     return playerRepository.findAllPlayers();

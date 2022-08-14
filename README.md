@@ -24,7 +24,7 @@ down: `docker-compose down`
 
 ### List all players
 
-`$ curl localhost:8080/controller/players/`
+`$ curl localhost:8080/controller/players/ -u user:password`
 
 ### Create new player
 
@@ -36,11 +36,11 @@ down: `docker-compose down`
 
 ### Find player by id
 
-`$ curl localhost:8080/controller/players/ddba8655-4c9b-4760-81c0-e32448866550`
+`$ curl localhost:8080/controller/players/ddba8655-4c9b-4760-81c0-e32448866550 -u user:password`
 
 ### History for player by id
 
-`$ curl localhost:8080/controller/players/history/ddba8655-4c9b-4760-81c0-e32448866550`
+`$ curl localhost:8080/controller/players/history/ddba8655-4c9b-4760-81c0-e32448866550 -u admin:password`
 
 ### Delete player by id
 

@@ -1,41 +1,25 @@
 package com.ak.spring.data.entity;
 
 import java.time.LocalDate;
-import java.time.ZonedDateTime;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
 import javax.persistence.AttributeConverter;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.IdClass;
 
-import com.ak.spring.data.id.RevisionableId;
 import com.ak.util.Strings;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
-import org.hibernate.annotations.Type;
 import org.springframework.lang.NonNull;
 
 @Entity
-@IdClass(RevisionableId.class)
-public final class Player {
+public final class Player extends AbstractRevisionable {
   public enum Gender {
     MALE, FEMALE
   }
 
-  @Id
-  @Type(type = "uuid-char")
-  private UUID uuid;
-  @Id
-  @GeneratedValue(strategy = GenerationType.SEQUENCE)
-  private long revision;
-  private ZonedDateTime created;
   private String firstName = Strings.EMPTY;
   private String surName = Strings.EMPTY;
   private String lastName = Strings.EMPTY;
@@ -58,18 +42,16 @@ public final class Player {
   }
 
   public Player() {
-    this(UUID.randomUUID());
+    super();
   }
 
   public Player(@NonNull UUID uuid) {
-    this.uuid = uuid;
-    created = ZonedDateTime.now();
+    super(uuid);
   }
 
   @NonNull
   public Player copyInstance() {
-    Player p = new Player();
-    p.uuid = uuid;
+    Player p = new Player(getUUID());
     p.firstName = firstName;
     p.surName = surName;
     p.lastName = lastName;
@@ -98,11 +80,6 @@ public final class Player {
   }
 
   @NonNull
-  public UUID getUUID() {
-    return uuid;
-  }
-
-  @NonNull
   public String getFirstName() {
     return firstName;
   }
@@ -115,10 +92,6 @@ public final class Player {
   @NonNull
   public String getLastName() {
     return lastName;
-  }
-
-  public long getRevision() {
-    return revision;
   }
 
   public LocalDate getBirthDate() {
@@ -138,17 +111,16 @@ public final class Player {
     if (!(o instanceof Player player)) {
       return false;
     }
-    return uuid.equals(player.uuid) && revision == player.revision;
+    return equalsId(player);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(uuid, revision);
+    return hashCodeId();
   }
 
   @Override
   public String toString() {
-    return "Player{uuid=%s, revision=%d, created=%s, '%s %s %s', %s, %s}"
-        .formatted(uuid, revision, created, firstName, surName, lastName, birthDate, gender);
+    return "Player{%s, '%s %s %s', %s, %s}".formatted(super.toString(), firstName, surName, lastName, birthDate, gender);
   }
 }

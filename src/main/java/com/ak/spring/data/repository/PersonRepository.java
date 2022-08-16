@@ -26,7 +26,7 @@ public interface PersonRepository extends JpaRepository<Person, RevisionableId> 
    * @return single Player
    */
   @Query("select a from Person a left outer join Person b ON a.uuid = b.uuid AND a.revision < b.revision where b.uuid is null and a.uuid = :uuid " +
-      "and (NULLIF(a.name, '') IS NOT NULL or NULLIF(a.password, '') IS NOT NULL)")
+      "and NULLIF(a.password, '') IS NOT NULL")
   @NonNull
   Optional<Person> findByUUID(@Param("uuid") @NonNull UUID uuid);
 
@@ -37,8 +37,7 @@ public interface PersonRepository extends JpaRepository<Person, RevisionableId> 
    * @return list of the latest Person's versions
    */
   @Query("select a from Person a left outer join Person b ON a.uuid = b.uuid AND a.revision < b.revision where b.uuid is null " +
-      "and (NULLIF(a.name, '') IS NOT NULL or NULLIF(a.password, '') IS NOT NULL)" +
-      "order by a.revision desc nulls last")
+      "and NULLIF(a.password, '') IS NOT NULL order by a.revision desc nulls last")
   @NonNull
   List<Person> findAllPersons();
 }

@@ -9,7 +9,9 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import com.ak.spring.data.entity.Person;
 import com.ak.spring.data.entity.Player;
+import com.ak.spring.data.repository.PersonRepository;
 import com.ak.spring.data.repository.PlayerRepository;
 import com.ak.util.Strings;
 import com.github.javafaker.Faker;
@@ -18,14 +20,35 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
+import static com.ak.util.Strings.NEW_LINE;
+
 @Service
 public class DataGenerator {
   private static final Logger LOGGER = Logger.getLogger(DataGenerator.class.getName());
-  private static final String NEW_LINE = String.format("%n");
   private static final Random RANDOM = new SecureRandom();
 
-  @Bean
-  public CommandLineRunner commandLineRunner(@NonNull PlayerRepository repository) {
+  @Bean(name = "Persons")
+  public CommandLineRunner generatePersons(@NonNull PersonRepository repository) {
+    return args -> {
+      if (repository.count() == 0) {
+        LOGGER.info(() -> "Generate admin");
+        Person admin = new Person();
+        admin.setName("admin");
+        admin.setPassword("password");
+        admin.setRole(Person.Role.ADMIN);
+        repository.save(admin);
+        LOGGER.info(() ->
+            "Persons found:%n%s".formatted(repository.findAll().stream().map(Person::toString)
+                .collect(Collectors.joining(NEW_LINE))));
+      }
+      else {
+        LOGGER.info(() -> "Use existing data, found %d users".formatted(repository.count()));
+      }
+    };
+  }
+
+  @Bean(name = "PLayers")
+  public CommandLineRunner generatePlayers(@NonNull PlayerRepository repository) {
     return args -> {
       if (repository.count() == 0) {
         Faker faker = new Faker(Locale.getDefault());
@@ -53,7 +76,7 @@ public class DataGenerator {
                 })
         );
         LOGGER.info(() ->
-            "Players found with findAll():%n%s".formatted(repository.findAll().stream().map(Player::toString)
+            "Players found:%n%s".formatted(repository.findAll().stream().map(Player::toString)
                 .collect(Collectors.joining(NEW_LINE))));
       }
       else {

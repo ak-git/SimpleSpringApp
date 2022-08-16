@@ -12,7 +12,6 @@ import org.springframework.lang.NonNull;
 @Immutable
 public final class RevisionableId implements Serializable {
   private static final Random RANDOM = new SecureRandom();
-  @NonNull
   private final UUID uuid;
   private final long revision;
 

@@ -9,16 +9,15 @@ import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
+import static org.assertj.core.api.Assertions.assertThatNoException;
+
 @SpringBootTest(classes = {Application.class, DataGenerator.class})
 @EnableJpaRepositories(basePackages = "com.ak.spring.data.repository")
 @EntityScan(basePackages = "com.ak.spring.data.entity")
 class DataGeneratorTest {
-  @Autowired
-  private CommandLineRunner commandLineRunner;
-
   @Test
-  void commandLineRunner() {
-    Assertions.assertNotNull(commandLineRunner);
-    org.assertj.core.api.Assertions.assertThatNoException().isThrownBy(() -> commandLineRunner.run());
+  void generatePlayers(@Autowired CommandLineRunner generatePlayers) {
+    Assertions.assertNotNull(generatePlayers);
+    assertThatNoException().isThrownBy(generatePlayers::run);
   }
 }

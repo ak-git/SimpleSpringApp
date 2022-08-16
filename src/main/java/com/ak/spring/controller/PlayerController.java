@@ -41,50 +41,50 @@ public final class PlayerController {
     }
   }
 
-  private final PlayerRepository playerRepository;
+  private final PlayerRepository repository;
 
   @Autowired
-  public PlayerController(@NonNull PlayerRepository playerRepository) {
-    this.playerRepository = playerRepository;
+  public PlayerController(@NonNull PlayerRepository repository) {
+    this.repository = repository;
   }
 
   @GetMapping("/history/{uuid}")
   @ResponseBody
   @NonNull
-  public List<Player> getPlayerHistoryByUUID(@PathVariable("uuid") @NonNull UUID uuid) {
-    return playerRepository.historyForUUID(uuid);
+  public List<Player> getHistoryByUUID(@PathVariable("uuid") @NonNull UUID uuid) {
+    return repository.historyForUUID(uuid);
   }
 
   @GetMapping("/{uuid}")
   @ResponseBody
   @NonNull
-  public ResponseEntity<Player> getPlayerByUUID(@PathVariable("uuid") @NonNull UUID uuid) {
-    Player player = playerRepository.findByUUID(uuid);
-    return player == null ? new ResponseEntity<>(HttpStatus.NO_CONTENT) : new ResponseEntity<>(player, HttpStatus.OK);
+  public ResponseEntity<Player> getByUUID(@PathVariable("uuid") @NonNull UUID uuid) {
+    return repository.findByUUID(uuid)
+        .map(p -> new ResponseEntity<>(p, HttpStatus.OK)).orElse(new ResponseEntity<>(HttpStatus.NO_CONTENT));
   }
 
   @GetMapping("/")
   @ResponseBody
   @NonNull
-  public List<Player> players() {
-    return playerRepository.findAllPlayers();
+  public List<Player> getAll() {
+    return repository.findAllPlayers();
   }
 
   @PostMapping("/")
   @ResponseStatus(HttpStatus.OK)
-  public Player createPlayer(@RequestBody @NonNull PlayerRecord p) {
-    return playerRepository.save(p.toPlayer(Player::new));
+  public Player create(@RequestBody @NonNull PlayerRecord p) {
+    return repository.save(p.toPlayer(Player::new));
   }
 
   @PutMapping("/{uuid}")
   @ResponseStatus(HttpStatus.OK)
-  public Player updatePlayer(@PathVariable("uuid") @NonNull UUID uuid, @RequestBody @NonNull PlayerRecord p) {
-    return playerRepository.save(p.toPlayer(() -> new Player(uuid)));
+  public Player update(@PathVariable("uuid") @NonNull UUID uuid, @RequestBody @NonNull PlayerRecord p) {
+    return repository.save(p.toPlayer(() -> new Player(uuid)));
   }
 
   @DeleteMapping("/{uuid}")
   @ResponseStatus(HttpStatus.ACCEPTED)
-  public Player deletePlayer(@PathVariable("uuid") @NonNull UUID uuid) {
-    return playerRepository.save(new Player(uuid));
+  public Player delete(@PathVariable("uuid") @NonNull UUID uuid) {
+    return repository.save(new Player(uuid));
   }
 }

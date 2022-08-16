@@ -42,21 +42,10 @@ public final class Player extends AbstractRevisionable {
   }
 
   public Player() {
-    super();
   }
 
   public Player(@NonNull UUID uuid) {
     super(uuid);
-  }
-
-  @NonNull
-  public Player copyInstance() {
-    Player p = new Player(getUUID());
-    p.firstName = firstName;
-    p.surName = surName;
-    p.lastName = lastName;
-    p.birthDate = birthDate;
-    return p;
   }
 
   public void setFirstName(@NonNull String firstName) {

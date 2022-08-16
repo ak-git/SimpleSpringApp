@@ -4,8 +4,8 @@ import java.util.List;
 import java.util.stream.IntStream;
 
 import com.ak.spring.Application;
-import com.ak.spring.data.entity.Player;
-import com.ak.spring.data.repository.PlayerRepository;
+import com.ak.spring.data.entity.Person;
+import com.ak.spring.data.repository.PersonRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,29 +16,29 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-@SpringBootTest(classes = {Application.class, PlayerRepository.class})
+@SpringBootTest(classes = {Application.class, PersonRepository.class})
 @EnableJpaRepositories(basePackages = "com.ak.spring.data.repository")
 @EntityScan(basePackages = "com.ak.spring.data.entity")
-class PlayerRepositoryTest {
+class PersonRepositoryTest {
   @Autowired
-  private PlayerRepository repository;
+  private PersonRepository repository;
 
   @BeforeEach
   void setUp() {
     int size = 2;
-    List<Player> entities = IntStream.range(0, size).mapToObj(value -> new Player()).toList();
+    List<Person> entities = IntStream.range(0, size).mapToObj(value -> new Person()).toList();
     repository.saveAll(entities);
   }
 
   @Test
-  void testPlayer() {
-    List<Player> players = repository.findAll();
+  void testPerson() {
+    List<Person> persons = repository.findAll();
 
-    assertAll(players.toString(), () -> {
-      assertThat(players).isNotEmpty();
-      Player p1 = players.get(0);
-      Player p2 = players.get(1);
-      Player p3 = new Player(p1.getUUID());
+    assertAll(persons.toString(), () -> {
+      assertThat(persons).isNotEmpty();
+      Person p1 = persons.get(0);
+      Person p2 = persons.get(1);
+      Person p3 = new Person(p1.getName(), p1.getPassword(), p1.getRole());
       assertThat(p1).isNotEqualTo(p2).isNotEqualTo(p3).isNotEqualTo(new Object()).isEqualTo(p1);
       assertThat(new Object()).isNotEqualTo(p1);
       assertThat(p1).doesNotHaveSameHashCodeAs(p2).doesNotHaveSameHashCodeAs(p3).hasSameHashCodeAs(p1);

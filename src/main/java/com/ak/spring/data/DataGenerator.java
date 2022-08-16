@@ -18,14 +18,15 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
+import static com.ak.util.Strings.NEW_LINE;
+
 @Service
 public class DataGenerator {
   private static final Logger LOGGER = Logger.getLogger(DataGenerator.class.getName());
-  private static final String NEW_LINE = String.format("%n");
   private static final Random RANDOM = new SecureRandom();
 
   @Bean
-  public CommandLineRunner commandLineRunner(@NonNull PlayerRepository repository) {
+  public CommandLineRunner generatePlayers(@NonNull PlayerRepository repository) {
     return args -> {
       if (repository.count() == 0) {
         Faker faker = new Faker(Locale.getDefault());
@@ -44,16 +45,8 @@ public class DataGenerator {
             })
             .toList()
         );
-        IntStream.range(0, 2).forEach(value ->
-            repository.findAll().stream().filter(player -> RANDOM.nextDouble() < 0.1)
-                .forEach(player -> {
-                  Player entity = player.copyInstance();
-                  entity.setSurName(faker.funnyName().name());
-                  repository.save(entity);
-                })
-        );
         LOGGER.info(() ->
-            "Players found with findAll():%n%s".formatted(repository.findAll().stream().map(Player::toString)
+            "Players found:%n%s".formatted(repository.findAll().stream().map(Player::toString)
                 .collect(Collectors.joining(NEW_LINE))));
       }
       else {

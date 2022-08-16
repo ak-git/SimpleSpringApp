@@ -81,7 +81,7 @@ class PlayerControllerTest {
   }
 
   @Test
-  void testNoLoginPostDelete() throws Exception {
+  void testNoLoginDelete() throws Exception {
     assertNotNull(checkUnauthorized(MockMvcRequestBuilders.delete("/controller/players/")));
   }
 
@@ -92,14 +92,14 @@ class PlayerControllerTest {
   @ParameterizedTest
   @MethodSource("player")
   @WithMockUser(roles = {"ADMIN", "USER"})
-  void testGetPlayerHistoryByUUID(@NonNull PlayerController.PlayerRecord playerRecord) throws Exception {
-    Player player = createPlayer(playerRecord);
+  void testGetHistoryByUUID(@NonNull PlayerController.PlayerRecord playerRecord) throws Exception {
+    Player player = create(playerRecord);
     PlayerController.PlayerRecord second = new PlayerController.PlayerRecord(
         playerRecord.firstName(), "second", playerRecord.lastName(), LocalDate.parse("1981-07-03"), Player.Gender.MALE);
-    Player p2 = updatePlayer(player.getUUID(), second);
+    Player p2 = update(player.getUUID(), second);
     PlayerController.PlayerRecord third = new PlayerController.PlayerRecord(
         playerRecord.firstName(), "third", playerRecord.lastName(), LocalDate.parse("1981-07-03"), Player.Gender.MALE);
-    Player p3 = updatePlayer(player.getUUID(), third);
+    Player p3 = update(player.getUUID(), third);
 
     Player[] players = checkHistory(player.getUUID(), third, second, playerRecord);
     assertThat(players).hasSize(3);
@@ -110,18 +110,18 @@ class PlayerControllerTest {
   @ParameterizedTest
   @MethodSource("player")
   @WithMockUser("USER")
-  void testCreatePlayer(@NonNull PlayerController.PlayerRecord playerRecord) throws Exception {
+  void testCreate(@NonNull PlayerController.PlayerRecord playerRecord) throws Exception {
     int size = players().size();
-    assertNotNull(createPlayer(playerRecord));
+    assertNotNull(create(playerRecord));
     assertThat(players()).hasSize(size + 1);
   }
 
   @ParameterizedTest
   @MethodSource("player")
   @WithMockUser("USER")
-  void testGetPlayer(@NonNull PlayerController.PlayerRecord playerRecord) throws Exception {
-    Player player1 = createPlayer(playerRecord);
-    Player player2 = getPlayerByUUID(player1.getUUID(), playerRecord);
+  void testGet(@NonNull PlayerController.PlayerRecord playerRecord) throws Exception {
+    Player player1 = create(playerRecord);
+    Player player2 = getByUUID(player1.getUUID(), playerRecord);
     assertThat(player1).isEqualTo(player2);
   }
 
@@ -140,13 +140,13 @@ class PlayerControllerTest {
   @ParameterizedTest
   @MethodSource("player")
   @WithMockUser(roles = {"ADMIN", "USER"})
-  void testUpdatePlayer(@NonNull PlayerController.PlayerRecord playerRecord) throws Exception {
+  void testUpdate(@NonNull PlayerController.PlayerRecord playerRecord) throws Exception {
     int size = players().size();
-    Player player1 = createPlayer(playerRecord);
+    Player player1 = create(playerRecord);
     PlayerController.PlayerRecord playerRecord2 = new PlayerController.PlayerRecord(
         playerRecord.firstName(), "V2", playerRecord.lastName(), LocalDate.parse("1981-07-03"), Player.Gender.MALE
     );
-    Player player2 = updatePlayer(player1.getUUID(), playerRecord2);
+    Player player2 = update(player1.getUUID(), playerRecord2);
     assertThat(player1).isNotEqualTo(player2);
     assertThat(checkHistory(player1.getUUID(), playerRecord2, playerRecord)).hasSize(2);
     assertThat(players()).hasSize(size + 1);
@@ -155,9 +155,9 @@ class PlayerControllerTest {
   @ParameterizedTest
   @MethodSource("player")
   @WithMockUser(roles = {"ADMIN", "USER"})
-  void testDeletePlayer(@NonNull PlayerController.PlayerRecord playerRecord) throws Exception {
+  void testDelete(@NonNull PlayerController.PlayerRecord playerRecord) throws Exception {
     int size = players().size();
-    UUID uuid = createPlayer(playerRecord).getUUID();
+    UUID uuid = create(playerRecord).getUUID();
     assertThat(checkHistory(uuid, playerRecord)).hasSize(1);
     assertNotNull(
         mvc.perform(MockMvcRequestBuilders
@@ -179,7 +179,7 @@ class PlayerControllerTest {
   }
 
   @NonNull
-  private Player createPlayer(@NonNull PlayerController.PlayerRecord playerRecord) throws Exception {
+  private Player create(@NonNull PlayerController.PlayerRecord playerRecord) throws Exception {
     return check(MockMvcRequestBuilders.post("/controller/players/")
             .content(mapper.writeValueAsString(playerRecord))
             .contentType(MediaType.APPLICATION_JSON).with(csrf()),
@@ -195,13 +195,13 @@ class PlayerControllerTest {
     return List.of(new ObjectMapper().reader().readValue(response.getContentAsString(), Player[].class));
   }
 
-  private Player getPlayerByUUID(@NonNull UUID uuid, @NonNull PlayerController.PlayerRecord playerRecord) throws Exception {
+  private Player getByUUID(@NonNull UUID uuid, @NonNull PlayerController.PlayerRecord playerRecord) throws Exception {
     return check(MockMvcRequestBuilders.get("/controller/players/%s".formatted(uuid)).accept(MediaType.APPLICATION_JSON),
         playerRecord
     );
   }
 
-  private Player updatePlayer(@NonNull UUID uuid, @NonNull PlayerController.PlayerRecord playerRecord) throws Exception {
+  private Player update(@NonNull UUID uuid, @NonNull PlayerController.PlayerRecord playerRecord) throws Exception {
     return check(MockMvcRequestBuilders.put("/controller/players/%s".formatted(uuid))
             .content(mapper.writeValueAsString(playerRecord))
             .contentType(MediaType.APPLICATION_JSON),

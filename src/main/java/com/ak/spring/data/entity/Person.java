@@ -15,7 +15,7 @@ import org.springframework.lang.NonNull;
 @Entity
 public final class Person extends AbstractRevisionable {
   public enum Role {
-    ADMIN, USER;
+    ADMIN, USER, NONE;
 
     public static String[] all() {
       return Arrays.stream(values()).map(Enum::name).toArray(String[]::new);
@@ -25,12 +25,12 @@ public final class Person extends AbstractRevisionable {
   private String name = Strings.EMPTY;
   private String password = Strings.EMPTY;
   @Convert(converter = RoleConverter.class)
-  private Role role = Role.USER;
+  private Role role = Role.NONE;
 
   private static class RoleConverter implements AttributeConverter<Role, String> {
     @Override
     public String convertToDatabaseColumn(Role attribute) {
-      return Optional.ofNullable(attribute).orElse(Role.USER).name();
+      return Optional.ofNullable(attribute).orElse(Role.NONE).name();
     }
 
     @Override

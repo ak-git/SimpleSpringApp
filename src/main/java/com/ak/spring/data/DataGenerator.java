@@ -9,9 +9,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import com.ak.spring.data.entity.Person;
 import com.ak.spring.data.entity.Player;
-import com.ak.spring.data.repository.PersonRepository;
 import com.ak.spring.data.repository.PlayerRepository;
 import com.ak.util.Strings;
 import com.github.javafaker.Faker;
@@ -27,25 +25,7 @@ public class DataGenerator {
   private static final Logger LOGGER = Logger.getLogger(DataGenerator.class.getName());
   private static final Random RANDOM = new SecureRandom();
 
-  @Bean(name = "Persons")
-  public CommandLineRunner generatePersons(@NonNull PersonRepository repository) {
-    return args -> {
-      if (repository.count() == 0) {
-        LOGGER.info(() -> "Generate admin");
-        Person admin = new Person("admin", "password");
-        admin.setRole(Person.Role.ADMIN);
-        repository.save(admin);
-        LOGGER.info(() ->
-            "Persons found:%n%s".formatted(repository.findAll().stream().map(Person::toString)
-                .collect(Collectors.joining(NEW_LINE))));
-      }
-      else {
-        LOGGER.info(() -> "Use existing data, found %d users".formatted(repository.count()));
-      }
-    };
-  }
-
-  @Bean(name = "PLayers")
+  @Bean
   public CommandLineRunner generatePlayers(@NonNull PlayerRepository repository) {
     return args -> {
       if (repository.count() == 0) {
@@ -64,14 +44,6 @@ public class DataGenerator {
               return entity;
             })
             .toList()
-        );
-        IntStream.range(0, 2).forEach(value ->
-            repository.findAll().stream().filter(player -> RANDOM.nextDouble() < 0.1)
-                .forEach(player -> {
-                  Player entity = player.copyInstance();
-                  entity.setSurName(faker.funnyName().name());
-                  repository.save(entity);
-                })
         );
         LOGGER.info(() ->
             "Players found:%n%s".formatted(repository.findAll().stream().map(Player::toString)

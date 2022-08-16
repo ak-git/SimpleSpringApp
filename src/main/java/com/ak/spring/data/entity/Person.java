@@ -1,6 +1,7 @@
 package com.ak.spring.data.entity;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -14,12 +15,15 @@ import org.springframework.lang.NonNull;
 @Entity
 public final class Person extends AbstractRevisionable {
   public enum Role {
-    ADMIN, USER
+    ADMIN, USER;
+
+    public static String[] all() {
+      return Arrays.stream(values()).map(Enum::name).toArray(String[]::new);
+    }
   }
 
   private String name = Strings.EMPTY;
   private String password = Strings.EMPTY;
-  private boolean active = true;
   @Convert(converter = RoleConverter.class)
   private Role role = Role.USER;
 
@@ -39,17 +43,10 @@ public final class Person extends AbstractRevisionable {
     super();
   }
 
-  public Person(@NonNull String name, @NonNull String password) {
+  public Person(@NonNull String name, @NonNull String password, @NonNull Role role) {
     super(UUID.nameUUIDFromBytes(name.getBytes(StandardCharsets.UTF_8)));
     this.name = name;
     this.password = password;
-  }
-
-  public void setActive(boolean active) {
-    this.active = active;
-  }
-
-  public void setRole(@NonNull Role role) {
     this.role = role;
   }
 
@@ -59,10 +56,6 @@ public final class Person extends AbstractRevisionable {
 
   public String getPassword() {
     return password;
-  }
-
-  public boolean isActive() {
-    return active;
   }
 
   public Role getRole() {
@@ -87,6 +80,6 @@ public final class Person extends AbstractRevisionable {
 
   @Override
   public String toString() {
-    return "Person{%s, %s active=%s, role=%s}".formatted(super.toString(), password, active, role);
+    return "Person{%s, password=%s, role=%s}".formatted(super.toString(), password, role);
   }
 }

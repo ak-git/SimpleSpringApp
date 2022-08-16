@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.ak.spring.Application;
 import com.ak.spring.data.entity.Player;
+import com.ak.spring.security.PersonDetailsService;
 import com.ak.spring.security.SpringSecurityConfig;
 import com.ak.util.Strings;
 import org.junit.jupiter.api.Test;
@@ -20,7 +21,7 @@ import org.springframework.security.web.csrf.CsrfTokenRepository;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-@SpringBootTest(classes = {Application.class, PlayerController.class, SpringSecurityConfig.class}, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(classes = {Application.class, PlayerController.class, SpringSecurityConfig.class, PersonDetailsService.class}, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @EnableJpaRepositories(basePackages = "com.ak.spring.data.repository")
 @EntityScan(basePackages = "com.ak.spring.data.entity")
 class PlayerControllerIntegrationTest {

@@ -1,0 +1,47 @@
+package com.ak.spring.security;
+
+import java.nio.charset.StandardCharsets;
+import java.util.UUID;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
+
+import com.ak.spring.data.entity.Person;
+import com.ak.spring.data.repository.PersonRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.NonNull;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import static com.ak.util.Strings.NEW_LINE;
+
+@Service
+public class PersonDetailsService implements UserDetailsService {
+  private static final Logger LOGGER = Logger.getLogger(PersonDetailsService.class.getName());
+  private final PersonRepository repository;
+
+  public PersonDetailsService(@Autowired @NonNull PersonRepository repository, @Autowired @NonNull PasswordEncoder encoder) {
+    this.repository = repository;
+    if (repository.count() == 0) {
+      LOGGER.info(() -> "Generate users:");
+      repository.save(new Person("admin", encoder.encode("password"), Person.Role.ADMIN));
+      repository.save(new Person("user", encoder.encode("password"), Person.Role.USER));
+      LOGGER.info(() ->
+          "Users found:%n%s".formatted(repository.findAll().stream().map(Person::toString)
+              .collect(Collectors.joining(NEW_LINE))));
+    }
+    else {
+      LOGGER.info(() -> "Use existing data, found %d users".formatted(repository.count()));
+    }
+  }
+
+  @Override
+  public UserDetails loadUserByUsername(@NonNull String userName) throws UsernameNotFoundException {
+    return repository.findByUUID(UUID.nameUUIDFromBytes(userName.getBytes(StandardCharsets.UTF_8)))
+        .map(person -> User.withUsername(person.getName()).password(person.getPassword()).roles(person.getRole().name()).build())
+        .orElseThrow(() -> new UsernameNotFoundException("Not found: " + userName));
+  }
+}

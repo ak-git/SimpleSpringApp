@@ -1,5 +1,6 @@
 package com.ak.spring.data.entity;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -38,25 +39,9 @@ public final class Person extends AbstractRevisionable {
     super();
   }
 
-  public Person(@NonNull UUID uuid) {
-    super(uuid);
-  }
-
-  @NonNull
-  public Person copyInstance() {
-    Person p = new Person(getUUID());
-    p.name = name;
-    p.password = password;
-    p.active = active;
-    p.role = role;
-    return p;
-  }
-
-  public void setName(@NonNull String name) {
+  public Person(@NonNull String name, @NonNull String password) {
+    super(UUID.nameUUIDFromBytes(name.getBytes(StandardCharsets.UTF_8)));
     this.name = name;
-  }
-
-  public void setPassword(@NonNull String password) {
     this.password = password;
   }
 
@@ -102,6 +87,6 @@ public final class Person extends AbstractRevisionable {
 
   @Override
   public String toString() {
-    return "Person{%s, %s %s active=%s, role=%s}".formatted(super.toString(), name, password, active, role);
+    return "Person{%s, %s active=%s, role=%s}".formatted(super.toString(), password, active, role);
   }
 }

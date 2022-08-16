@@ -32,9 +32,7 @@ public class DataGenerator {
     return args -> {
       if (repository.count() == 0) {
         LOGGER.info(() -> "Generate admin");
-        Person admin = new Person();
-        admin.setName("admin");
-        admin.setPassword("password");
+        Person admin = new Person("admin", "password");
         admin.setRole(Person.Role.ADMIN);
         repository.save(admin);
         LOGGER.info(() ->

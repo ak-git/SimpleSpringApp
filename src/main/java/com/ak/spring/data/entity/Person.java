@@ -48,7 +48,7 @@ public final class Person extends AbstractRevisionable {
   }
 
   public Person(@NonNull String name, @NonNull String password, @NonNull Role role) {
-    super(UUID.nameUUIDFromBytes(name.getBytes(StandardCharsets.UTF_8)));
+    super(nameToUUID(name));
     this.name = name;
     this.password = password;
     this.role = role;
@@ -85,5 +85,9 @@ public final class Person extends AbstractRevisionable {
   @Override
   public String toString() {
     return "Person{%s, password=%s, role=%s}".formatted(super.toString(), password, role);
+  }
+
+  public static UUID nameToUUID(@NonNull String name) {
+    return UUID.nameUUIDFromBytes(name.getBytes(StandardCharsets.UTF_8));
   }
 }

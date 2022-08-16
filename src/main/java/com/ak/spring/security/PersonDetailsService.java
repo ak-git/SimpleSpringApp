@@ -1,7 +1,5 @@
 package com.ak.spring.security;
 
-import java.nio.charset.StandardCharsets;
-import java.util.UUID;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -35,7 +33,7 @@ public class PersonDetailsService implements UserDetailsService {
 
   @Override
   public UserDetails loadUserByUsername(@NonNull String userName) throws UsernameNotFoundException {
-    return repository.findByUUID(UUID.nameUUIDFromBytes(userName.getBytes(StandardCharsets.UTF_8)))
+    return repository.findByUUID(Person.nameToUUID(userName))
         .map(person -> User.withUsername(person.getName()).password(person.getPassword()).roles(person.getRole().name()).build())
         .orElseThrow(() -> new UsernameNotFoundException("Not found: " + userName));
   }

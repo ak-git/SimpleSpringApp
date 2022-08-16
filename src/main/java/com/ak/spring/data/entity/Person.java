@@ -40,11 +40,6 @@ public final class Person extends AbstractRevisionable {
   }
 
   public Person() {
-    super();
-  }
-
-  public Person(@NonNull UUID uuid) {
-    super(uuid);
   }
 
   public Person(@NonNull String name, @NonNull String password, @NonNull Role role) {

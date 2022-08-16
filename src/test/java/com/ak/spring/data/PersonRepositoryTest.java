@@ -38,7 +38,7 @@ class PersonRepositoryTest {
       assertThat(persons).isNotEmpty();
       Person p1 = persons.get(0);
       Person p2 = persons.get(1);
-      Person p3 = new Person(p1.getUUID());
+      Person p3 = new Person(p1.getName(), p1.getPassword(), p1.getRole());
       assertThat(p1).isNotEqualTo(p2).isNotEqualTo(p3).isNotEqualTo(new Object()).isEqualTo(p1);
       assertThat(new Object()).isNotEqualTo(p1);
       assertThat(p1).doesNotHaveSameHashCodeAs(p2).doesNotHaveSameHashCodeAs(p3).hasSameHashCodeAs(p1);

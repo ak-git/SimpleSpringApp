@@ -42,7 +42,6 @@ public final class Player extends AbstractRevisionable {
   }
 
   public Player() {
-    super();
   }
 
   public Player(@NonNull UUID uuid) {

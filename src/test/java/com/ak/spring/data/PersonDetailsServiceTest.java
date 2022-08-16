@@ -16,6 +16,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SpringBootTest(classes = {Application.class, PersonRepository.class, SpringSecurityConfig.class})
 @EnableJpaRepositories(basePackages = "com.ak.spring.data.repository")
@@ -28,6 +29,8 @@ class PersonDetailsServiceTest {
 
   @Test
   void generatePersons() {
+    assertNotNull(repository);
+    assertNotNull(encoder);
     Stream.generate(() -> new PersonDetailsService(repository, encoder)).limit(2)
         .forEach(personDetailsService ->
             assertThatExceptionOfType(UsernameNotFoundException.class).isThrownBy(

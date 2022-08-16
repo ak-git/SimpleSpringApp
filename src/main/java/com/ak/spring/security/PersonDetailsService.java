@@ -28,7 +28,7 @@ public class PersonDetailsService implements UserDetailsService {
       repository.save(new Person("admin", encoder.encode("password"), Person.Role.ADMIN));
       repository.save(new Person("user", encoder.encode("password"), Person.Role.USER));
     }
-    LOGGER.info(() -> "Users found:%n%s".formatted(repository.findAll().stream().map(Person::toString).collect(Collectors.joining(NEW_LINE))));
+    LOGGER.info(() -> "Users:%n%s".formatted(repository.findAll().stream().map(Person::toString).collect(Collectors.joining(NEW_LINE))));
   }
 
   @Override

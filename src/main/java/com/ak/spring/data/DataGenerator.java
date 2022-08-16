@@ -30,7 +30,7 @@ public class DataGenerator {
     return args -> {
       if (repository.count() == 0) {
         Faker faker = new Faker(Locale.getDefault());
-        LOGGER.info(() -> "Generating players");
+        LOGGER.info(() -> "Generate players");
         repository.saveAll(IntStream.range(0, 50)
             .mapToObj(value -> {
               Player entity = new Player();
@@ -45,13 +45,8 @@ public class DataGenerator {
             })
             .toList()
         );
-        LOGGER.info(() ->
-            "Players found:%n%s".formatted(repository.findAll().stream().map(Player::toString)
-                .collect(Collectors.joining(NEW_LINE))));
       }
-      else {
-        LOGGER.info(() -> "Use existing data, found %d players".formatted(repository.count()));
-      }
+      LOGGER.info(() -> "Players:%n%s".formatted(repository.findAll().stream().map(Player::toString).collect(Collectors.joining(NEW_LINE))));
     };
   }
 }

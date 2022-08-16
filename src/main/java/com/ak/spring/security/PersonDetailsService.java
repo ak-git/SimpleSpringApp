@@ -29,13 +29,8 @@ public class PersonDetailsService implements UserDetailsService {
       LOGGER.info(() -> "Generate users:");
       repository.save(new Person("admin", encoder.encode("password"), Person.Role.ADMIN));
       repository.save(new Person("user", encoder.encode("password"), Person.Role.USER));
-      LOGGER.info(() ->
-          "Users found:%n%s".formatted(repository.findAll().stream().map(Person::toString)
-              .collect(Collectors.joining(NEW_LINE))));
     }
-    else {
-      LOGGER.info(() -> "Use existing data, found %d users".formatted(repository.count()));
-    }
+    LOGGER.info(() -> "Users found:%n%s".formatted(repository.findAll().stream().map(Person::toString).collect(Collectors.joining(NEW_LINE))));
   }
 
   @Override

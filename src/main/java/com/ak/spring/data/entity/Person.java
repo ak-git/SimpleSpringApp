@@ -43,6 +43,10 @@ public final class Person extends AbstractRevisionable {
     super();
   }
 
+  public Person(@NonNull UUID uuid) {
+    super(uuid);
+  }
+
   public Person(@NonNull String name, @NonNull String password, @NonNull Role role) {
     super(UUID.nameUUIDFromBytes(name.getBytes(StandardCharsets.UTF_8)));
     this.name = name;

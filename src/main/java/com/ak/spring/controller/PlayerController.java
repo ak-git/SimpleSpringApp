@@ -59,8 +59,8 @@ public final class PlayerController {
   @ResponseBody
   @NonNull
   public ResponseEntity<Player> getPlayerByUUID(@PathVariable("uuid") @NonNull UUID uuid) {
-    Player player = playerRepository.findByUUID(uuid);
-    return player == null ? new ResponseEntity<>(HttpStatus.NO_CONTENT) : new ResponseEntity<>(player, HttpStatus.OK);
+    return playerRepository.findByUUID(uuid)
+        .map(player -> new ResponseEntity<>(player, HttpStatus.OK)).orElse(new ResponseEntity<>(HttpStatus.NO_CONTENT));
   }
 
   @GetMapping("/")

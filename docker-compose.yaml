@@ -57,8 +57,6 @@ services:
   simple-spring-app:
     container_name: simple-spring-app
     image: a002k/simple-spring-app
-    build:
-      context: .
     ports:
       - "8080:8080"
     depends_on:

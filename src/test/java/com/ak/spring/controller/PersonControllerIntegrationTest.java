@@ -4,7 +4,6 @@ import com.ak.spring.Application;
 import com.ak.spring.data.entity.Person;
 import com.ak.spring.security.PersonDetailsService;
 import com.ak.spring.security.SpringSecurityConfig;
-import com.ak.util.Strings;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -24,16 +23,16 @@ class PersonControllerIntegrationTest extends AbstractControllerIntegrationTest 
     int size = withAuth("admin").getForObject("/controller/persons/", Person[].class).length;
     assertThat(size).isPositive();
     Person person1 = withAuth("admin").postForObject("/controller/persons/", "ak1", Person.class);
-    checkEquals(person1, "ak1", Strings.EMPTY);
+    checkEquals(person1, "ak1");
     Person person2 = withAuth("admin").postForObject("/controller/persons/", "ak2", Person.class);
-    checkEquals(person2, "ak2", Strings.EMPTY);
+    checkEquals(person2, "ak2");
     assertThat(person1).isNotEqualTo(person2);
 
     Person person3 = withAuth("admin").getForObject("/controller/persons/%s".formatted("ak1"), Person.class);
     assertThat(person3).isEqualTo(person1);
     withAuth("admin").put("/controller/persons/%s".formatted("ak1"), "password");
     Person person = withAuth("ak1").getForObject("/controller/persons/%s".formatted("ak1"), Person.class);
-    checkEquals(person, "ak1", "password");
+    checkEquals(person, "ak1");
     assertThat(person).isNotEqualTo(person3).isNotEqualTo(person1);
 
     withAuth("admin").delete("/controller/persons/%s".formatted("ak1"));
@@ -41,7 +40,7 @@ class PersonControllerIntegrationTest extends AbstractControllerIntegrationTest 
     assertThat(withAuth("admin").getForObject("/controller/persons/", Person[].class)).hasSize(size);
   }
 
-  private void checkEquals(@NonNull Person person, @NonNull String name, @NonNull String rawPassword) {
+  private void checkEquals(@NonNull Person person, @NonNull String name) {
     assertAll(person.toString(), () -> {
       assertThat(person.getName()).isEqualTo(name);
       assertThat(person.getRole()).isEqualTo(Person.Role.USER);

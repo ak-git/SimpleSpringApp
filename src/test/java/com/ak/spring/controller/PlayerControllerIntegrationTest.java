@@ -21,7 +21,8 @@ import org.springframework.security.web.csrf.CsrfTokenRepository;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-@SpringBootTest(classes = {Application.class, PlayerController.class, SpringSecurityConfig.class, PersonDetailsService.class}, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(classes = {Application.class, PlayerController.class, SpringSecurityConfig.class, PersonDetailsService.class},
+    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @EnableJpaRepositories(basePackages = "com.ak.spring.data.repository")
 @EntityScan(basePackages = "com.ak.spring.data.entity")
 class PlayerControllerIntegrationTest {

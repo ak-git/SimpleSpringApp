@@ -1,7 +1,6 @@
 package com.ak.spring.controller;
 
 import java.time.LocalDate;
-import java.util.List;
 
 import com.ak.spring.Application;
 import com.ak.spring.data.entity.Player;
@@ -9,14 +8,10 @@ import com.ak.spring.security.PersonDetailsService;
 import com.ak.spring.security.SpringSecurityConfig;
 import com.ak.util.Strings;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.lang.NonNull;
-import org.springframework.security.web.csrf.CsrfToken;
-import org.springframework.security.web.csrf.CsrfTokenRepository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -25,12 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @EnableJpaRepositories(basePackages = "com.ak.spring.data.repository")
 @EntityScan(basePackages = "com.ak.spring.data.entity")
-class PlayerControllerIntegrationTest {
-  @Autowired
-  private TestRestTemplate template;
-  @Autowired
-  private CsrfTokenRepository csrfTokenRepository;
-
+class PlayerControllerIntegrationTest extends AbstractControllerIntegrationTest {
   @Test
   void index() {
     int size = withAuth("user").getForObject("/controller/players/", Player[].class).length;
@@ -65,18 +55,5 @@ class PlayerControllerIntegrationTest {
       assertThat(player.getBirthDate()).isEqualTo(playerRecord.birthDate());
       assertThat(player.getGender()).isEqualTo(playerRecord.gender());
     });
-  }
-
-  private TestRestTemplate withAuth(@NonNull String user) {
-    CsrfToken csrfToken = csrfTokenRepository.generateToken(null);
-    TestRestTemplate testRestTemplate = template.withBasicAuth(user, "password");
-    testRestTemplate.getRestTemplate().setInterceptors(List.of(
-        (request, body, execution) -> {
-          request.getHeaders().add(csrfToken.getHeaderName(), csrfToken.getToken());
-          request.getHeaders().add("Cookie", "XSRF-TOKEN=" + csrfToken.getToken());
-          return execution.execute(request, body);
-        }
-    ));
-    return testRestTemplate;
   }
 }

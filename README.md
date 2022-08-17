@@ -26,7 +26,13 @@ down: `docker-compose down`
 
 ### List all users
 
-`$ curl localhost:8080/controller/persons/ -c cookie.txt`
+`$ curl localhost:8080/controller/persons/ -u admin:password -c cookie.txt`
+
+### Find user by name
+
+`$ curl localhost:8080/controller/persons/admin -c cookie.txt`
+
+`$ curl localhost:8080/controller/persons/user -c cookie.txt`
 
 ### Create new user
 

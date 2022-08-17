@@ -40,6 +40,14 @@ public final class PersonController {
     return repository.findAllPersons();
   }
 
+  @GetMapping("/{name}")
+  @ResponseBody
+  @NonNull
+  public ResponseEntity<Person> getByName(@PathVariable("name") @NonNull String name) {
+    return repository.findByUUID(Person.nameToUUID(name))
+        .map(p -> new ResponseEntity<>(p, HttpStatus.OK)).orElse(new ResponseEntity<>(HttpStatus.NO_CONTENT));
+  }
+
   @PostMapping("/")
   @ResponseStatus(HttpStatus.OK)
   @NonNull

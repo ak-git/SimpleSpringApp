@@ -69,8 +69,18 @@ class PersonControllerTest {
   }
 
   @Test
-  void testNoLoginGetAll() throws Exception {
+  @WithMockUser(username = "admin", roles = "ADMIN")
+  void testLoginGetAll() throws Exception {
     assertNotNull(checkUnauthorizedOk(MockMvcRequestBuilders.get("/controller/persons/")));
+  }
+
+  @Test
+  void testNoLoginGetByName() throws Exception {
+    assertNotNull(checkUnauthorizedOk(MockMvcRequestBuilders.get("/controller/persons/user")));
+    assertNotNull(
+        mvc.perform(MockMvcRequestBuilders.get("/controller/persons/user2").with(csrf()))
+            .andDo(print()).andExpect(status().isNoContent())
+    );
   }
 
   @ParameterizedTest

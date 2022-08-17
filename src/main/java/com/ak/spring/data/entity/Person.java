@@ -10,11 +10,10 @@ import javax.persistence.Convert;
 import javax.persistence.Entity;
 
 import com.ak.util.Strings;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.lang.NonNull;
 
 @Entity
-@JsonIgnoreProperties({"uuid", "password"})
 public final class Person extends AbstractRevisionable {
   public enum Role {
     ADMIN, USER, NONE;
@@ -25,6 +24,7 @@ public final class Person extends AbstractRevisionable {
   }
 
   private String name = Strings.EMPTY;
+  @JsonIgnore
   private String password = Strings.EMPTY;
   @Convert(converter = RoleConverter.class)
   private Role role = Role.NONE;
@@ -81,7 +81,7 @@ public final class Person extends AbstractRevisionable {
 
   @Override
   public String toString() {
-    return "Person{%s, password=%s, role=%s}".formatted(super.toString(), password, role);
+    return "Person{%s, name=%s, password=%s, role=%s}".formatted(super.toString(), name, password, role);
   }
 
   public static UUID nameToUUID(@NonNull String name) {

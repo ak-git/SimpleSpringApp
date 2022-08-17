@@ -111,9 +111,9 @@ class PlayerControllerTest {
   @MethodSource("player")
   @WithMockUser("USER")
   void testCreate(@NonNull PlayerController.PlayerRecord playerRecord) throws Exception {
-    int size = players().size();
+    int size = list().size();
     assertNotNull(create(playerRecord));
-    assertThat(players()).hasSize(size + 1);
+    assertThat(list()).hasSize(size + 1);
   }
 
   @ParameterizedTest
@@ -141,7 +141,7 @@ class PlayerControllerTest {
   @MethodSource("player")
   @WithMockUser(roles = {"ADMIN", "USER"})
   void testUpdate(@NonNull PlayerController.PlayerRecord playerRecord) throws Exception {
-    int size = players().size();
+    int size = list().size();
     Player player1 = create(playerRecord);
     PlayerController.PlayerRecord playerRecord2 = new PlayerController.PlayerRecord(
         playerRecord.firstName(), "V2", playerRecord.lastName(), LocalDate.parse("1981-07-03"), Player.Gender.MALE
@@ -149,14 +149,14 @@ class PlayerControllerTest {
     Player player2 = update(player1.getUUID(), playerRecord2);
     assertThat(player1).isNotEqualTo(player2);
     assertThat(checkHistory(player1.getUUID(), playerRecord2, playerRecord)).hasSize(2);
-    assertThat(players()).hasSize(size + 1);
+    assertThat(list()).hasSize(size + 1);
   }
 
   @ParameterizedTest
   @MethodSource("player")
   @WithMockUser(roles = {"ADMIN", "USER"})
   void testDelete(@NonNull PlayerController.PlayerRecord playerRecord) throws Exception {
-    int size = players().size();
+    int size = list().size();
     UUID uuid = create(playerRecord).getUUID();
     assertThat(checkHistory(uuid, playerRecord)).hasSize(1);
     assertNotNull(
@@ -175,7 +175,7 @@ class PlayerControllerTest {
             .andExpect(status().isNoContent())
             .andExpect(content().string(Strings.EMPTY))
     );
-    assertThat(players()).hasSize(size);
+    assertThat(list()).hasSize(size);
   }
 
   @NonNull
@@ -188,7 +188,7 @@ class PlayerControllerTest {
   }
 
   @NonNull
-  private List<Player> players() throws Exception {
+  private List<Player> list() throws Exception {
     MockHttpServletResponse response = mvc.perform(MockMvcRequestBuilders.get("/controller/players/")
             .contentType(MediaType.APPLICATION_JSON).with(csrf()))
         .andReturn().getResponse();

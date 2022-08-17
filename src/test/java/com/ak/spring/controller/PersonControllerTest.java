@@ -65,17 +65,16 @@ class PersonControllerTest {
   void setUp() {
     repository.deleteAll();
     repository.save(new Person("admin", encoder.encode("password"), Person.Role.ADMIN));
+    repository.save(new Person("user", encoder.encode(Strings.EMPTY), Person.Role.USER));
   }
 
   @Test
   void testNoLoginGetAll() throws Exception {
-    assertNotNull(
-        mvc.perform(MockMvcRequestBuilders.get("/controller/persons/")).andDo(print()).andExpect(status().isOk())
-    );
+    assertNotNull(checkUnauthorizedOk(MockMvcRequestBuilders.get("/controller/persons/")));
   }
 
   @ParameterizedTest
-  @ValueSource(strings = "username")
+  @ValueSource(strings = {"username", "something"})
   void testNoLoginPost(@NonNull String userName) throws Exception {
     assertNotNull(checkUnauthorized(MockMvcRequestBuilders.post("/controller/persons/")
         .content(userName)
@@ -92,41 +91,57 @@ class PersonControllerTest {
     return mvc.perform(requestBuilder.with(csrf())).andDo(print()).andExpect(status().isUnauthorized());
   }
 
-  @ParameterizedTest
-  @ValueSource(strings = "username")
-  @WithMockUser(username = "admin", roles = "ADMIN")
-  void testCreate(@NonNull String userName) throws Exception {
-    int size = persons().size();
-    assertNotNull(create(userName));
-    assertThat(persons()).hasSize(size + 1);
+  private ResultActions checkUnauthorizedOk(@NonNull MockHttpServletRequestBuilder requestBuilder) throws Exception {
+    return mvc.perform(requestBuilder.with(csrf())).andDo(print()).andExpect(status().isOk());
   }
 
   @ParameterizedTest
-  @ValueSource(strings = "username")
+  @ValueSource(strings = {"username", "something"})
+  @WithMockUser(username = "admin", roles = "ADMIN")
+  void testCreate(@NonNull String userName) throws Exception {
+    int size = list().size();
+    assertNotNull(check(MockMvcRequestBuilders.post("/controller/persons/")
+            .content(userName)
+            .contentType(MediaType.APPLICATION_JSON).with(csrf()),
+        userName
+    ));
+    assertThat(list()).hasSize(size + 1);
+  }
+
+  @Test
+  void testPut() throws Exception {
+    assertNotNull(mvc.perform(MockMvcRequestBuilders.put("/controller/persons/invalidUser")
+        .content("password")
+        .contentType(MediaType.APPLICATION_JSON)
+        .with(csrf())).andDo(print()).andExpect(status().isNoContent()));
+
+    assertNotNull(checkUnauthorizedOk(MockMvcRequestBuilders.put("/controller/persons/user")
+        .content("password")
+        .contentType(MediaType.APPLICATION_JSON)
+    ));
+    assertNotNull(mvc.perform(MockMvcRequestBuilders.put("/controller/persons/user")
+        .content("password2")
+        .contentType(MediaType.APPLICATION_JSON)
+        .with(csrf())).andDo(print()).andExpect(status().isNoContent()));
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {"username", "something"})
   @WithMockUser(username = "admin", roles = "ADMIN")
   void testDelete(@NonNull String userName) throws Exception {
-    int size = persons().size();
+    int size = list().size();
     assertThatNoException().isThrownBy(() -> userDetailsService.loadUserByUsername("admin"));
     assertNotNull(
-        mvc.perform(MockMvcRequestBuilders
-                .delete("/controller/persons/%s".formatted(userName)).with(csrf()))
+        mvc.perform(MockMvcRequestBuilders.delete("/controller/persons/%s".formatted(userName)).with(csrf()))
             .andDo(print())
             .andExpect(status().isAccepted())
     );
     assertThatExceptionOfType(UsernameNotFoundException.class).isThrownBy(() -> userDetailsService.loadUserByUsername(userName));
-    assertThat(persons()).hasSize(size);
-  }
-
-  private Person create(@NonNull String userName) throws Exception {
-    return check(MockMvcRequestBuilders.post("/controller/persons/")
-            .content(userName)
-            .contentType(MediaType.APPLICATION_JSON).with(csrf()),
-        userName
-    );
+    assertThat(list()).hasSize(size);
   }
 
   @NonNull
-  private List<Person> persons() throws Exception {
+  private List<Person> list() throws Exception {
     MockHttpServletResponse response = mvc.perform(MockMvcRequestBuilders.get("/controller/persons/")
             .contentType(MediaType.APPLICATION_JSON).with(csrf()))
         .andReturn().getResponse();

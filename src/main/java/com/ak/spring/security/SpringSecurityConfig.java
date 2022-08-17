@@ -36,6 +36,7 @@ public class SpringSecurityConfig {
         .and()
         .authorizeRequests()
         .antMatchers(HttpMethod.GET, PERSON_PATTERN).permitAll()
+        .antMatchers(HttpMethod.POST, PERSON_PATTERN).permitAll()
         .antMatchers(HttpMethod.POST, PERSON_PATTERN).hasRole(Person.Role.ADMIN.name())
         .antMatchers(HttpMethod.DELETE, PERSON_PATTERN).hasRole(Person.Role.ADMIN.name())
         .antMatchers(HttpMethod.GET, "/controller/players/history/**").hasRole(Person.Role.ADMIN.name())

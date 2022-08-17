@@ -52,7 +52,7 @@ wrapper {
 
 allprojects {
     group = 'com.ak'
-    version = '2022.08.16'
+    version = '2022.08.17'
     apply plugin: 'idea'
 
     apply plugin: 'java'

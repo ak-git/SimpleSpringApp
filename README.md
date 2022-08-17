@@ -22,6 +22,28 @@ down: `docker-compose down`
 
 [localhost:8080/controller/players/history/1c6cefa4-9622-40c7-8d5f-6223c5f4aa0d](localhost:8080/controller/players/history/1c6cefa4-9622-40c7-8d5f-6223c5f4aa0d)
 
+## User management
+
+### List all users
+
+`$ curl localhost:8080/controller/persons/ -c cookie.txt`
+
+### Create new user
+
+Find **XSRF-TOKEN** in `cookie.txt`
+
+`$ curl -X POST localhost:8080/controller/persons/
+-H "Content-type:application/json"
+-H "Cookie: XSRF-TOKEN=8a2cecc9-a7ea-4ef5-9b19-8caea71c68cc" -H "X-XSRF-TOKEN:8a2cecc9-a7ea-4ef5-9b19-8caea71c68cc" -u admin:password
+-d "Doo"`
+
+### Delete user
+
+`curl -X DELETE localhost:8080/controller/persons/5670ee20-d8ac-3075-b402-9a8b4839a454
+-H "Cookie: XSRF-TOKEN=fabe1658-6e15-4cbf-b0bd-538bafad6cd8" -H "X-XSRF-TOKEN:fabe1658-6e15-4cbf-b0bd-538bafad6cd8" -u admin:password`
+
+## Player management
+
 ### List all players
 
 `$ curl localhost:8080/controller/players/ -u user:password -c cookie.txt`
@@ -30,9 +52,9 @@ down: `docker-compose down`
 
 Find **XSRF-TOKEN** in `cookie.txt`
 
-`$ curl -X POST localhost:8080/controller/players/ 
--H "Content-type:application/json" 
--H "Cookie: XSRF-TOKEN=f9923651-c287-4f19-a1d0-6bbad646ff01" -H "X-XSRF-TOKEN:f9923651-c287-4f19-a1d0-6bbad646ff01" -u user:password 
+`$ curl -X POST localhost:8080/controller/players/
+-H "Content-type:application/json"
+-H "Cookie: XSRF-TOKEN=f9923651-c287-4f19-a1d0-6bbad646ff01" -H "X-XSRF-TOKEN:f9923651-c287-4f19-a1d0-6bbad646ff01" -u user:password
 -d {\"lastName\":\"Doo\"}`
 
 ### Update player

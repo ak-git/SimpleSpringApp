@@ -10,9 +10,11 @@ import javax.persistence.Convert;
 import javax.persistence.Entity;
 
 import com.ak.util.Strings;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.springframework.lang.NonNull;
 
 @Entity
+@JsonIgnoreProperties({"uuid", "password"})
 public final class Person extends AbstractRevisionable {
   public enum Role {
     ADMIN, USER, NONE;

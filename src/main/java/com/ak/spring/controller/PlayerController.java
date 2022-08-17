@@ -66,24 +66,27 @@ public final class PlayerController {
   @GetMapping("/")
   @ResponseBody
   @NonNull
-  public List<Player> getAll() {
+  public List<Player> list() {
     return repository.findAllPlayers();
   }
 
   @PostMapping("/")
   @ResponseStatus(HttpStatus.OK)
+  @NonNull
   public Player create(@RequestBody @NonNull PlayerRecord p) {
     return repository.save(p.toPlayer(Player::new));
   }
 
   @PutMapping("/{uuid}")
   @ResponseStatus(HttpStatus.OK)
+  @NonNull
   public Player update(@PathVariable("uuid") @NonNull UUID uuid, @RequestBody @NonNull PlayerRecord p) {
     return repository.save(p.toPlayer(() -> new Player(uuid)));
   }
 
   @DeleteMapping("/{uuid}")
   @ResponseStatus(HttpStatus.ACCEPTED)
+  @NonNull
   public Player delete(@PathVariable("uuid") @NonNull UUID uuid) {
     return repository.save(new Player(uuid));
   }

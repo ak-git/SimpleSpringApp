@@ -1,8 +1,6 @@
 package com.ak.spring.controller;
 
 import java.util.List;
-import java.util.UUID;
-import java.util.stream.Stream;
 
 import com.ak.spring.Application;
 import com.ak.spring.data.entity.Person;
@@ -14,7 +12,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
@@ -39,14 +36,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -71,20 +65,19 @@ class PersonControllerTest {
   void setUp() {
     repository.deleteAll();
     repository.save(new Person("admin", encoder.encode("password"), Person.Role.ADMIN));
+    repository.save(new Person("user", encoder.encode(Strings.EMPTY), Person.Role.USER));
   }
 
-
-  @ParameterizedTest
-  @ValueSource(strings = {"/controller/persons/history/", "/controller/persons/"})
-  void testNoLoginGet(@NonNull String address) throws Exception {
-    assertNotNull(checkUnauthorized(MockMvcRequestBuilders.get(address).accept(MediaType.APPLICATION_JSON)));
+  @Test
+  void testNoLoginGetAll() throws Exception {
+    assertNotNull(checkUnauthorizedOk(MockMvcRequestBuilders.get("/controller/persons/")));
   }
 
   @ParameterizedTest
-  @MethodSource("person")
-  void testNoLoginPost(@NonNull PersonController.PersonRecord personRecord) throws Exception {
+  @ValueSource(strings = {"username", "something"})
+  void testNoLoginPost(@NonNull String userName) throws Exception {
     assertNotNull(checkUnauthorized(MockMvcRequestBuilders.post("/controller/persons/")
-        .content(mapper.writeValueAsString(personRecord))
+        .content(userName)
         .contentType(MediaType.APPLICATION_JSON)
     ));
   }
@@ -98,152 +91,76 @@ class PersonControllerTest {
     return mvc.perform(requestBuilder.with(csrf())).andDo(print()).andExpect(status().isUnauthorized());
   }
 
-  @ParameterizedTest
-  @MethodSource("person")
-  @WithMockUser(username = "admin", roles = "ADMIN")
-  void testGetHistoryByUUID(@NonNull PersonController.PersonRecord personRecord) throws Exception {
-    Person person = create(personRecord);
-    PersonController.PersonRecord second = new PersonController.PersonRecord(personRecord.name(), "second");
-    Person p2 = create(second);
-    PersonController.PersonRecord third = new PersonController.PersonRecord(personRecord.name(), "third");
-    Person p3 = create(third);
-
-    Person[] persons = checkHistory(person.getUUID(), third, second, personRecord);
-    assertThat(persons).hasSize(3);
-    assertThat(persons[0]).isEqualTo(p3).isNotEqualTo(p2).isNotEqualTo(person);
-    assertThat(persons[persons.length - 1]).isEqualTo(person).isNotEqualTo(p2).isNotEqualTo(p3);
+  private ResultActions checkUnauthorizedOk(@NonNull MockHttpServletRequestBuilder requestBuilder) throws Exception {
+    return mvc.perform(requestBuilder.with(csrf())).andDo(print()).andExpect(status().isOk());
   }
 
   @ParameterizedTest
-  @MethodSource("person")
+  @ValueSource(strings = {"username", "something"})
   @WithMockUser(username = "admin", roles = "ADMIN")
-  void testCreate(@NonNull PersonController.PersonRecord personRecord) throws Exception {
-    int size = persons().size();
-    assertNotNull(create(personRecord));
-    assertThat(persons()).hasSize(size + 1);
-  }
-
-  @ParameterizedTest
-  @MethodSource("person")
-  @WithMockUser(username = "admin", roles = "ADMIN")
-  void testGet(@NonNull PersonController.PersonRecord personRecord) throws Exception {
-    Person person1 = create(personRecord);
-    Person person2 = getByUUID(person1.getUUID(), personRecord);
-    assertThat(person1).isEqualTo(person2);
+  void testCreate(@NonNull String userName) throws Exception {
+    int size = list().size();
+    assertNotNull(check(MockMvcRequestBuilders.post("/controller/persons/")
+            .content(userName)
+            .contentType(MediaType.APPLICATION_JSON).with(csrf()),
+        userName
+    ));
+    assertThat(list()).hasSize(size + 1);
   }
 
   @Test
-  @WithMockUser(username = "admin", roles = "ADMIN")
-  void testInvalidUUID() throws Exception {
-    assertNotNull(
-        mvc.perform(MockMvcRequestBuilders
-                .get("/controller/persons/%s".formatted(UUID.randomUUID())).accept(MediaType.APPLICATION_JSON))
-            .andDo(print())
-            .andExpect(status().isNoContent())
-            .andExpect(content().string(Strings.EMPTY))
-    );
+  void testPut() throws Exception {
+    assertNotNull(mvc.perform(MockMvcRequestBuilders.put("/controller/persons/invalidUser")
+        .content("password")
+        .contentType(MediaType.APPLICATION_JSON)
+        .with(csrf())).andDo(print()).andExpect(status().isNoContent()));
+
+    assertNotNull(checkUnauthorizedOk(MockMvcRequestBuilders.put("/controller/persons/user")
+        .content("password")
+        .contentType(MediaType.APPLICATION_JSON)
+    ));
+    assertNotNull(mvc.perform(MockMvcRequestBuilders.put("/controller/persons/user")
+        .content("password2")
+        .contentType(MediaType.APPLICATION_JSON)
+        .with(csrf())).andDo(print()).andExpect(status().isNoContent()));
   }
 
   @ParameterizedTest
-  @MethodSource("person")
+  @ValueSource(strings = {"username", "something"})
   @WithMockUser(username = "admin", roles = "ADMIN")
-  void testUpdate(@NonNull PersonController.PersonRecord personRecord) throws Exception {
-    int size = persons().size();
-    Person person1 = create(personRecord);
-    PersonController.PersonRecord personRecord2 = new PersonController.PersonRecord(personRecord.name(), "V2");
-    Person person2 = create(personRecord2);
-    assertThat(person1).isNotEqualTo(person2);
-    assertThat(checkHistory(person1.getUUID(), personRecord2, personRecord)).hasSize(2);
-    assertThat(persons()).hasSize(size + 1);
-  }
-
-  @ParameterizedTest
-  @MethodSource("person")
-  @WithMockUser(username = "admin", roles = "ADMIN")
-  void testDelete(@NonNull PersonController.PersonRecord personRecord) throws Exception {
-    int size = persons().size();
-    UUID uuid = create(personRecord).getUUID();
-    assertThat(checkHistory(uuid, personRecord)).hasSize(1);
-    String userName = personRecord.name();
-    assertThatNoException().isThrownBy(() -> userDetailsService.loadUserByUsername(userName));
+  void testDelete(@NonNull String userName) throws Exception {
+    int size = list().size();
+    assertThatNoException().isThrownBy(() -> userDetailsService.loadUserByUsername("admin"));
     assertNotNull(
-        mvc.perform(MockMvcRequestBuilders
-                .delete("/controller/persons/%s".formatted(uuid)).with(csrf()))
+        mvc.perform(MockMvcRequestBuilders.delete("/controller/persons/%s".formatted(userName)).with(csrf()))
             .andDo(print())
             .andExpect(status().isAccepted())
-            .andExpect(jsonPath("$.uuid", notNullValue()))
     );
     assertThatExceptionOfType(UsernameNotFoundException.class).isThrownBy(() -> userDetailsService.loadUserByUsername(userName));
-    var empty = new PersonController.PersonRecord(userName, Strings.EMPTY);
-    assertThat(checkHistory(uuid, empty, personRecord)).hasSize(2);
-    assertNotNull(
-        mvc.perform(MockMvcRequestBuilders
-                .get("/controller/persons/%s".formatted(uuid)).accept(MediaType.APPLICATION_JSON))
-            .andDo(print())
-            .andExpect(status().isNoContent())
-            .andExpect(content().string(Strings.EMPTY))
-    );
-    assertThat(persons()).hasSize(size);
-  }
-
-  private Person create(@NonNull PersonController.PersonRecord personRecord) throws Exception {
-    return check(MockMvcRequestBuilders.post("/controller/persons/")
-            .content(mapper.writeValueAsString(personRecord))
-            .contentType(MediaType.APPLICATION_JSON).with(csrf()),
-        personRecord
-    );
+    assertThat(list()).hasSize(size);
   }
 
   @NonNull
-  private List<Person> persons() throws Exception {
+  private List<Person> list() throws Exception {
     MockHttpServletResponse response = mvc.perform(MockMvcRequestBuilders.get("/controller/persons/")
             .contentType(MediaType.APPLICATION_JSON).with(csrf()))
         .andReturn().getResponse();
-    return List.of(new ObjectMapper().reader().readValue(response.getContentAsString(), Person[].class));
-  }
-
-  private Person getByUUID(@NonNull UUID uuid, @NonNull PersonController.PersonRecord personRecord) throws Exception {
-    return check(MockMvcRequestBuilders.get("/controller/persons/%s".formatted(uuid)).accept(MediaType.APPLICATION_JSON),
-        personRecord
-    );
+    return List.of(mapper.reader().readValue(response.getContentAsString(), Person[].class));
   }
 
   private Person check(@NonNull MockHttpServletRequestBuilder requestBuilder,
-                       @NonNull PersonController.PersonRecord personRecord) throws Exception {
+                       @NonNull String userName) throws Exception {
     MockHttpServletResponse response = mvc.perform(requestBuilder.with(csrf()))
         .andDo(print())
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.uuid", notNullValue()))
-        .andExpect(jsonPath("$.name", is(personRecord.name())))
-        .andExpect(jsonPath("$.password", is(personRecord.password())))
+        .andExpect(jsonPath("$.name", is(userName)))
         .andExpect(jsonPath("$.revision", greaterThan(0)))
         .andReturn().getResponse();
-    UserDetails userDetails = userDetailsService.loadUserByUsername(personRecord.name());
+    UserDetails userDetails = userDetailsService.loadUserByUsername(userName);
     assertAll(userDetails.toString(), () -> {
-      assertThat(userDetails.getUsername()).isEqualTo(personRecord.name());
-      assertThat(userDetails.getPassword()).isEqualTo(personRecord.password());
+      assertThat(userDetails.getUsername()).isEqualTo(userName);
+      assertThat(encoder.matches(Strings.EMPTY, userDetails.getPassword())).isTrue();
     });
-    return new ObjectMapper().reader().readValue(response.getContentAsString(), Person.class);
-  }
-
-  private Person[] checkHistory(@NonNull UUID uuid, @NonNull PersonController.PersonRecord... records) throws Exception {
-    ResultActions actions = mvc.perform(MockMvcRequestBuilders
-            .get("/controller/persons/history/%s".formatted(uuid)).accept(MediaType.APPLICATION_JSON).with(csrf()))
-        .andDo(print())
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$", hasSize(records.length)));
-
-    for (int i = 0; i < records.length; i++) {
-      PersonController.PersonRecord record = records[i];
-      actions
-          .andExpect(jsonPath("$[%d].uuid".formatted(i), notNullValue()))
-          .andExpect(jsonPath("$[%d].name".formatted(i), is(record.name())))
-          .andExpect(jsonPath("$[%d].password".formatted(i), is(record.password())));
-    }
-    return new ObjectMapper().reader().readValue(actions.andReturn().getResponse().getContentAsString(), Person[].class);
-  }
-
-  private static Stream<PersonController.PersonRecord> person() {
-    return Stream.of(new PersonController.PersonRecord("ak", "pass"));
+    return mapper.reader().readValue(response.getContentAsString(), Person.class);
   }
 }

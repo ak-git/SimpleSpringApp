@@ -16,7 +16,7 @@ import org.springframework.security.web.csrf.CsrfTokenRepository;
 @EnableWebSecurity
 @Configuration
 public class SpringSecurityConfig {
-  private static final String PERSON_ADMIN_PATTERN = "/controller/persons/**";
+  private static final String PERSON_PATTERN = "/controller/persons/**";
   private static final String PLAYER_USER_PATTERN = "/controller/players/**";
 
   @Bean
@@ -35,9 +35,10 @@ public class SpringSecurityConfig {
         .httpBasic()
         .and()
         .authorizeRequests()
-        .antMatchers(HttpMethod.GET, PERSON_ADMIN_PATTERN).hasRole(Person.Role.ADMIN.name())
-        .antMatchers(HttpMethod.POST, PERSON_ADMIN_PATTERN).hasRole(Person.Role.ADMIN.name())
-        .antMatchers(HttpMethod.DELETE, PERSON_ADMIN_PATTERN).hasRole(Person.Role.ADMIN.name())
+        .antMatchers(HttpMethod.GET, PERSON_PATTERN).permitAll()
+        .antMatchers(HttpMethod.POST, PERSON_PATTERN).permitAll()
+        .antMatchers(HttpMethod.POST, PERSON_PATTERN).hasRole(Person.Role.ADMIN.name())
+        .antMatchers(HttpMethod.DELETE, PERSON_PATTERN).hasRole(Person.Role.ADMIN.name())
         .antMatchers(HttpMethod.GET, "/controller/players/history/**").hasRole(Person.Role.ADMIN.name())
         .antMatchers(HttpMethod.GET, PLAYER_USER_PATTERN).hasAnyRole(Person.Role.all())
         .antMatchers(HttpMethod.POST, PLAYER_USER_PATTERN).hasAnyRole(Person.Role.all())

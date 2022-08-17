@@ -192,7 +192,7 @@ class PlayerControllerTest {
     MockHttpServletResponse response = mvc.perform(MockMvcRequestBuilders.get("/controller/players/")
             .contentType(MediaType.APPLICATION_JSON).with(csrf()))
         .andReturn().getResponse();
-    return List.of(new ObjectMapper().reader().readValue(response.getContentAsString(), Player[].class));
+    return List.of(mapper.reader().readValue(response.getContentAsString(), Player[].class));
   }
 
   private Player getByUUID(@NonNull UUID uuid, @NonNull PlayerController.PlayerRecord playerRecord) throws Exception {
@@ -222,7 +222,7 @@ class PlayerControllerTest {
         .andExpect(jsonPath("$.gender", is(playerRecord.gender().toString())))
         .andExpect(jsonPath("$.revision", greaterThan(0)))
         .andReturn().getResponse();
-    return new ObjectMapper().reader().readValue(response.getContentAsString(), Player.class);
+    return mapper.reader().readValue(response.getContentAsString(), Player.class);
   }
 
   private Player[] checkHistory(@NonNull UUID uuid, @NonNull PlayerController.PlayerRecord... records) throws Exception {
@@ -242,7 +242,7 @@ class PlayerControllerTest {
           .andExpect(jsonPath("$[%d].birthDate".formatted(i), is(record.birthDate().toString())))
           .andExpect(jsonPath("$[%d].gender".formatted(i), is(record.gender().toString())));
     }
-    return new ObjectMapper().reader().readValue(actions.andReturn().getResponse().getContentAsString(), Player[].class);
+    return mapper.reader().readValue(actions.andReturn().getResponse().getContentAsString(), Player[].class);
   }
 
   private static Stream<PlayerController.PlayerRecord> player() {

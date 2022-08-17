@@ -23,9 +23,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/controller/persons")
 public final class PersonController {
-  public record PersonRecord(String name, String password) {
-  }
-
   private final PersonRepository repository;
   private final PasswordEncoder encoder;
 
@@ -44,8 +41,8 @@ public final class PersonController {
 
   @PostMapping("/")
   @ResponseStatus(HttpStatus.OK)
-  public Person create(@RequestBody @NonNull PersonRecord p) {
-    return repository.save(new Person(p.name, encoder.encode(Strings.EMPTY), Person.Role.USER));
+  public Person create(@RequestBody @NonNull String userName) {
+    return repository.save(new Person(userName, encoder.encode(Strings.EMPTY), Person.Role.USER));
   }
 
   @DeleteMapping("/{uuid}")

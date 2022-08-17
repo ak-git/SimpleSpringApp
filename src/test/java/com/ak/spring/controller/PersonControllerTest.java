@@ -10,7 +10,6 @@ import com.ak.spring.security.PersonDetailsService;
 import com.ak.spring.security.SpringSecurityConfig;
 import com.ak.util.Strings;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -39,7 +38,6 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -82,7 +80,7 @@ class PersonControllerTest {
   @ValueSource(strings = "username")
   void testNoLoginPost(@NonNull String userName) throws Exception {
     assertNotNull(checkUnauthorized(MockMvcRequestBuilders.post("/controller/persons/")
-        .content(mapper.writeValueAsString(toPerson(userName)))
+        .content(userName)
         .contentType(MediaType.APPLICATION_JSON)
     ));
   }
@@ -124,11 +122,10 @@ class PersonControllerTest {
   }
 
   private Person create(@NonNull String userName) throws Exception {
-    PersonController.PersonRecord personRecord = toPerson(userName);
     return check(MockMvcRequestBuilders.post("/controller/persons/")
-            .content(mapper.writeValueAsString(personRecord))
+            .content(userName)
             .contentType(MediaType.APPLICATION_JSON).with(csrf()),
-        personRecord
+        userName
     );
   }
 
@@ -137,28 +134,23 @@ class PersonControllerTest {
     MockHttpServletResponse response = mvc.perform(MockMvcRequestBuilders.get("/controller/persons/")
             .contentType(MediaType.APPLICATION_JSON).with(csrf()))
         .andReturn().getResponse();
-    return List.of(new ObjectMapper().reader().readValue(response.getContentAsString(), Person[].class));
+    return List.of(mapper.reader().readValue(response.getContentAsString(), Person[].class));
   }
 
   private Person check(@NonNull MockHttpServletRequestBuilder requestBuilder,
-                       @NonNull PersonController.PersonRecord personRecord) throws Exception {
+                       @NonNull String userName) throws Exception {
     MockHttpServletResponse response = mvc.perform(requestBuilder.with(csrf()))
         .andDo(print())
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.uuid", notNullValue()))
-        .andExpect(jsonPath("$.name", is(personRecord.name())))
-        .andExpect(jsonPath("$.password", not(Matchers.empty())))
+        .andExpect(jsonPath("$.name", is(userName)))
         .andExpect(jsonPath("$.revision", greaterThan(0)))
         .andReturn().getResponse();
-    UserDetails userDetails = userDetailsService.loadUserByUsername(personRecord.name());
+    UserDetails userDetails = userDetailsService.loadUserByUsername(userName);
     assertAll(userDetails.toString(), () -> {
-      assertThat(userDetails.getUsername()).isEqualTo(personRecord.name());
-      assertThat(encoder.matches(personRecord.password(), userDetails.getPassword())).isTrue();
+      assertThat(userDetails.getUsername()).isEqualTo(userName);
+      assertThat(encoder.matches(Strings.EMPTY, userDetails.getPassword())).isTrue();
     });
-    return new ObjectMapper().reader().readValue(response.getContentAsString(), Person.class);
-  }
-
-  private PersonController.PersonRecord toPerson(@NonNull String userName) {
-    return new PersonController.PersonRecord(userName, Strings.EMPTY);
+    return mapper.reader().readValue(response.getContentAsString(), Person.class);
   }
 }

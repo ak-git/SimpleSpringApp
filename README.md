@@ -34,8 +34,8 @@ Find **XSRF-TOKEN** in `cookie.txt`
 
 `$ curl -X POST localhost:8080/controller/persons/
 -H "Content-type:application/json"
--H "Cookie: XSRF-TOKEN=fabe1658-6e15-4cbf-b0bd-538bafad6cd8" -H "X-XSRF-TOKEN:fabe1658-6e15-4cbf-b0bd-538bafad6cd8" -u admin:password
--d {\"name\":\"Doo\"}`
+-H "Cookie: XSRF-TOKEN=8a2cecc9-a7ea-4ef5-9b19-8caea71c68cc" -H "X-XSRF-TOKEN:8a2cecc9-a7ea-4ef5-9b19-8caea71c68cc" -u admin:password
+-d "Doo"`
 
 ### Delete user
 

@@ -14,10 +14,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface PersonRepository extends JpaRepository<Person, RevisionableId> {
-  @Query("select p from Person p where p.uuid = :uuid order by p.revision desc nulls last")
-  @NonNull
-  List<Person> historyForUUID(@Param("uuid") @NonNull UUID uuid);
-
   /**
    * Based on <a href="http://sqlfiddle.com/#!9/a6c585/1">SQL Fiddle</a>
    * and answer <a href="https://stackoverflow.com/a/7745635/808921">SQL select only rows with max value on a column</a>

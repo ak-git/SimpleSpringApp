@@ -8,8 +8,8 @@ import com.ak.spring.data.repository.PersonRepository;
 import com.ak.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,25 +27,12 @@ public final class PersonController {
   }
 
   private final PersonRepository repository;
+  private final PasswordEncoder encoder;
 
   @Autowired
-  public PersonController(@NonNull PersonRepository repository) {
+  public PersonController(@NonNull PersonRepository repository, @NonNull PasswordEncoder encoder) {
     this.repository = repository;
-  }
-
-  @GetMapping("/history/{uuid}")
-  @ResponseBody
-  @NonNull
-  public List<Person> getHistoryByUUID(@PathVariable("uuid") @NonNull UUID uuid) {
-    return repository.historyForUUID(uuid);
-  }
-
-  @GetMapping("/{uuid}")
-  @ResponseBody
-  @NonNull
-  public ResponseEntity<Person> getByUUID(@PathVariable("uuid") @NonNull UUID uuid) {
-    return repository.findByUUID(uuid)
-        .map(p -> new ResponseEntity<>(p, HttpStatus.OK)).orElse(new ResponseEntity<>(HttpStatus.NO_CONTENT));
+    this.encoder = encoder;
   }
 
   @GetMapping("/")
@@ -58,7 +45,7 @@ public final class PersonController {
   @PostMapping("/")
   @ResponseStatus(HttpStatus.OK)
   public Person create(@RequestBody @NonNull PersonRecord p) {
-    return repository.save(new Person(p.name, p.password, Person.Role.USER));
+    return repository.save(new Person(p.name, encoder.encode(Strings.EMPTY), Person.Role.USER));
   }
 
   @DeleteMapping("/{uuid}")

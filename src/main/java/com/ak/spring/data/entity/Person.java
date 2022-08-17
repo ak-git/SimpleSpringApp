@@ -10,6 +10,7 @@ import javax.persistence.Convert;
 import javax.persistence.Entity;
 
 import com.ak.util.Strings;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.lang.NonNull;
 
 @Entity
@@ -23,6 +24,7 @@ public final class Person extends AbstractRevisionable {
   }
 
   private String name = Strings.EMPTY;
+  @JsonIgnore
   private String password = Strings.EMPTY;
   @Convert(converter = RoleConverter.class)
   private Role role = Role.NONE;

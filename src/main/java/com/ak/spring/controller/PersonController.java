@@ -1,7 +1,6 @@
 package com.ak.spring.controller;
 
 import java.util.List;
-import java.util.UUID;
 
 import com.ak.spring.data.entity.Person;
 import com.ak.spring.data.repository.PersonRepository;
@@ -45,11 +44,9 @@ public final class PersonController {
     return repository.save(new Person(userName, encoder.encode(Strings.EMPTY), Person.Role.USER));
   }
 
-  @DeleteMapping("/{uuid}")
+  @DeleteMapping("/{name}")
   @ResponseStatus(HttpStatus.ACCEPTED)
-  public Person delete(@PathVariable("uuid") @NonNull UUID uuid) {
-    return repository.save(
-        new Person(repository.findByUUID(uuid).map(Person::getName).orElse(uuid.toString()), Strings.EMPTY, Person.Role.NONE)
-    );
+  public Person delete(@PathVariable("name") @NonNull String name) {
+    return repository.save(new Person(name, Strings.EMPTY, Person.Role.NONE));
   }
 }

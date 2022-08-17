@@ -1,7 +1,6 @@
 package com.ak.spring.controller;
 
 import java.util.List;
-import java.util.UUID;
 
 import com.ak.spring.Application;
 import com.ak.spring.data.entity.Person;
@@ -38,7 +37,6 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -108,14 +106,12 @@ class PersonControllerTest {
   @WithMockUser(username = "admin", roles = "ADMIN")
   void testDelete(@NonNull String userName) throws Exception {
     int size = persons().size();
-    UUID uuid = create(userName).getUUID();
-    assertThatNoException().isThrownBy(() -> userDetailsService.loadUserByUsername(userName));
+    assertThatNoException().isThrownBy(() -> userDetailsService.loadUserByUsername("admin"));
     assertNotNull(
         mvc.perform(MockMvcRequestBuilders
-                .delete("/controller/persons/%s".formatted(uuid)).with(csrf()))
+                .delete("/controller/persons/%s".formatted(userName)).with(csrf()))
             .andDo(print())
             .andExpect(status().isAccepted())
-            .andExpect(jsonPath("$.uuid", notNullValue()))
     );
     assertThatExceptionOfType(UsernameNotFoundException.class).isThrownBy(() -> userDetailsService.loadUserByUsername(userName));
     assertThat(persons()).hasSize(size);
@@ -142,7 +138,6 @@ class PersonControllerTest {
     MockHttpServletResponse response = mvc.perform(requestBuilder.with(csrf()))
         .andDo(print())
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.uuid", notNullValue()))
         .andExpect(jsonPath("$.name", is(userName)))
         .andExpect(jsonPath("$.revision", greaterThan(0)))
         .andReturn().getResponse();

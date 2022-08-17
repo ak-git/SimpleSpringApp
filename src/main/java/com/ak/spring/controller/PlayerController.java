@@ -66,7 +66,7 @@ public final class PlayerController {
   @GetMapping("/")
   @ResponseBody
   @NonNull
-  public List<Player> getAll() {
+  public List<Player> list() {
     return repository.findAllPlayers();
   }
 

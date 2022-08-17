@@ -69,11 +69,11 @@ class PersonControllerTest {
     repository.save(new Person("admin", encoder.encode("password"), Person.Role.ADMIN));
   }
 
-
-  @ParameterizedTest
-  @ValueSource(strings = {"/controller/persons/history/", "/controller/persons/"})
-  void testNoLoginGet(@NonNull String address) throws Exception {
-    assertNotNull(checkUnauthorized(MockMvcRequestBuilders.get(address).accept(MediaType.APPLICATION_JSON)));
+  @Test
+  void testNoLoginGetAll() throws Exception {
+    assertNotNull(
+        mvc.perform(MockMvcRequestBuilders.get("/controller/persons/")).andDo(print()).andExpect(status().isOk())
+    );
   }
 
   @ParameterizedTest

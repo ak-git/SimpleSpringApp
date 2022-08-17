@@ -35,7 +35,7 @@ public final class PersonController {
   @GetMapping("/")
   @ResponseBody
   @NonNull
-  public List<Person> getAll() {
+  public List<Person> list() {
     return repository.findAllPersons();
   }
 

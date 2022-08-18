@@ -21,7 +21,8 @@ public class PersonDetailsService implements UserDetailsService {
   private static final Logger LOGGER = Logger.getLogger(PersonDetailsService.class.getName());
   private final PersonRepository repository;
 
-  public PersonDetailsService(@Autowired @NonNull PersonRepository repository, @Autowired @NonNull PasswordEncoder encoder) {
+  @Autowired
+  public PersonDetailsService(@NonNull PersonRepository repository, @NonNull PasswordEncoder encoder) {
     this.repository = repository;
     if (repository.count() == 0) {
       LOGGER.info(() -> "Generate users:");

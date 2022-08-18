@@ -20,24 +20,27 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 class PersonControllerIntegrationTest extends AbstractControllerIntegrationTest {
   @Test
   void index() {
-    int size = withAuth("admin").getForObject("/controller/persons/", Person[].class).length;
+    String admin = " admin  ";
+    String ak1 = "ak1";
+    String ak2 = "ak2";
+    int size = withAuth(admin).getForObject("/controller/persons/", Person[].class).length;
     assertThat(size).isPositive();
-    Person person1 = withAuth("admin").postForObject("/controller/persons/", "ak1", Person.class);
-    checkEquals(person1, "ak1");
-    Person person2 = withAuth("admin").postForObject("/controller/persons/", "ak2", Person.class);
-    checkEquals(person2, "ak2");
+    Person person1 = withAuth(admin).postForObject("/controller/persons/", ak1, Person.class);
+    checkEquals(person1, ak1);
+    Person person2 = withAuth(admin).postForObject("/controller/persons/", ak2, Person.class);
+    checkEquals(person2, ak2);
     assertThat(person1).isNotEqualTo(person2);
 
-    Person person3 = withAuth("admin").getForObject("/controller/persons/%s".formatted("ak1"), Person.class);
+    Person person3 = withAuth(admin).getForObject("/controller/persons/%s".formatted(ak1), Person.class);
     assertThat(person3).isEqualTo(person1);
-    withAuth("admin").put("/controller/persons/%s".formatted("ak1"), "password");
-    Person person = withAuth("ak1").getForObject("/controller/persons/%s".formatted("ak1"), Person.class);
-    checkEquals(person, "ak1");
+    withAuth(admin).put("/controller/persons/%s".formatted(ak1), "password");
+    Person person = withAuth(ak1).getForObject("/controller/persons/%s".formatted(ak1), Person.class);
+    checkEquals(person, ak1);
     assertThat(person).isNotEqualTo(person3).isNotEqualTo(person1);
 
-    withAuth("admin").delete("/controller/persons/%s".formatted("ak1"));
-    withAuth("admin").delete("/controller/persons/%s".formatted("ak2"));
-    assertThat(withAuth("admin").getForObject("/controller/persons/", Person[].class)).hasSize(size);
+    withAuth(admin).delete("/controller/persons/%s".formatted(ak1));
+    withAuth(admin).delete("/controller/persons/%s".formatted(ak2));
+    assertThat(withAuth(admin).getForObject("/controller/persons/", Person[].class)).hasSize(size);
   }
 
   private void checkEquals(@NonNull Person person, @NonNull String name) {

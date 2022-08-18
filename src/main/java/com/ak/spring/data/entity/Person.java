@@ -37,7 +37,7 @@ public final class Person extends AbstractRevisionable {
 
     @Override
     public Role convertToEntityAttribute(@NonNull String dbData) {
-      return Role.valueOf(dbData);
+      return Role.valueOf(dbData.strip());
     }
   }
 
@@ -46,8 +46,8 @@ public final class Person extends AbstractRevisionable {
 
   public Person(@NonNull String name, @NonNull String password, @NonNull Role role) {
     super(nameToUUID(name));
-    this.name = name;
-    this.password = password;
+    this.name = name.strip();
+    this.password = password.strip();
     this.role = role;
   }
 
@@ -85,6 +85,6 @@ public final class Person extends AbstractRevisionable {
   }
 
   public static UUID nameToUUID(@NonNull String name) {
-    return UUID.nameUUIDFromBytes(name.getBytes(StandardCharsets.UTF_8));
+    return UUID.nameUUIDFromBytes(name.strip().getBytes(StandardCharsets.UTF_8));
   }
 }

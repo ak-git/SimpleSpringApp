@@ -10,8 +10,6 @@ services:
       PGDATA: "/var/lib/postgresql/data/pgdata"
     volumes:
       - .:/var/lib/postgresql/data
-    ports:
-      - ${POSTGRES_PORT:-5432}:5432
     networks:
       - db-net
     healthcheck:

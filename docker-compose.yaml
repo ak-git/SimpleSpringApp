@@ -2,7 +2,7 @@ version: "3.9"
 services:
   pgdb:
     container_name: pgdb
-    image: postgres:14.4
+    image: postgres:14.5
     environment:
       POSTGRES_DB: "db"
       POSTGRES_USER: ${POSTGRES_USER:-pguser}

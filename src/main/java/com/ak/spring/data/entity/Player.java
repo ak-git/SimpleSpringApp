@@ -37,7 +37,7 @@ public final class Player extends AbstractRevisionable {
 
     @Override
     public Gender convertToEntityAttribute(@NonNull String dbData) {
-      return Gender.valueOf(dbData);
+      return Gender.valueOf(dbData.strip());
     }
   }
 
@@ -49,15 +49,15 @@ public final class Player extends AbstractRevisionable {
   }
 
   public void setFirstName(@NonNull String firstName) {
-    this.firstName = firstName;
+    this.firstName = firstName.strip();
   }
 
   public void setSurName(@NonNull String surName) {
-    this.surName = surName;
+    this.surName = surName.strip();
   }
 
   public void setLastName(@NonNull String lastName) {
-    this.lastName = lastName;
+    this.lastName = lastName.strip();
   }
 
   public void setBirthDate(@NonNull LocalDate birthDate) {

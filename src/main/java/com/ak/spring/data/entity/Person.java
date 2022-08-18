@@ -1,7 +1,6 @@
 package com.ak.spring.data.entity;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -16,11 +15,7 @@ import org.springframework.lang.NonNull;
 @Entity
 public final class Person extends AbstractRevisionable {
   public enum Role {
-    ADMIN, USER, NONE;
-
-    public static String[] all() {
-      return Arrays.stream(values()).map(Enum::name).toArray(String[]::new);
-    }
+    ADMIN, USER, NONE
   }
 
   private String name = Strings.EMPTY;

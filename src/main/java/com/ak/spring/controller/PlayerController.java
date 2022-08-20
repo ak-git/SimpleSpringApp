@@ -2,13 +2,11 @@ package com.ak.spring.controller;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Supplier;
 
 import com.ak.spring.data.entity.Player;
 import com.ak.spring.data.repository.PlayerRepository;
-import com.ak.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,14 +28,8 @@ public final class PlayerController {
   public record PlayerRecord(String firstName, String surName, String lastName,
                              LocalDate birthDate, Player.Gender gender) {
     @NonNull
-    Player toPlayer(@NonNull Supplier<Player> p) {
-      Player player = p.get();
-      player.setFirstName(Optional.ofNullable(firstName).orElse(Strings.EMPTY));
-      player.setSurName(Optional.ofNullable(surName).orElse(Strings.EMPTY));
-      player.setLastName(Optional.ofNullable(lastName).orElse(Strings.EMPTY));
-      player.setBirthDate(Optional.ofNullable(birthDate).orElse(LocalDate.EPOCH));
-      player.setGender(Optional.ofNullable(gender).orElse(Player.Gender.MALE));
-      return player;
+    Player toPlayer(@NonNull Supplier<Player.Builder> b) {
+      return b.get().firstName(firstName).surName(surName).lastName(lastName).birthDate(birthDate).gender(gender).build();
     }
   }
 
@@ -74,20 +66,20 @@ public final class PlayerController {
   @ResponseStatus(HttpStatus.OK)
   @NonNull
   public Player create(@RequestBody @NonNull PlayerRecord p) {
-    return repository.save(p.toPlayer(Player::new));
+    return repository.save(p.toPlayer(Player.Builder::new));
   }
 
   @PutMapping("/{uuid}")
   @ResponseStatus(HttpStatus.OK)
   @NonNull
   public Player update(@PathVariable("uuid") @NonNull UUID uuid, @RequestBody @NonNull PlayerRecord p) {
-    return repository.save(p.toPlayer(() -> new Player(uuid)));
+    return repository.save(p.toPlayer(() -> new Player.Builder(uuid)));
   }
 
   @DeleteMapping("/{uuid}")
   @ResponseStatus(HttpStatus.ACCEPTED)
   @NonNull
   public Player delete(@PathVariable("uuid") @NonNull UUID uuid) {
-    return repository.save(new Player(uuid));
+    return repository.save(new Player.Builder(uuid).build());
   }
 }

@@ -11,7 +11,6 @@ import java.util.stream.IntStream;
 
 import com.ak.spring.data.entity.Player;
 import com.ak.spring.data.repository.PlayerRepository;
-import com.ak.util.Strings;
 import com.github.javafaker.Faker;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
@@ -30,21 +29,27 @@ public class DataGenerator {
     return args -> {
       if (repository.count() == 0) {
         Faker faker = new Faker(Locale.getDefault());
-        repository.saveAll(IntStream.range(0, 50)
-            .mapToObj(value -> {
-              Player entity = new Player();
-              entity.setFirstName(faker.name().firstName());
-              entity.setSurName(Strings.EMPTY);
-              entity.setLastName(faker.name().lastName());
-              entity.setBirthDate(LocalDate.of(RANDOM.nextInt(1991, 2001),
-                  Month.of(RANDOM.nextInt(Month.JANUARY.ordinal(), Month.DECEMBER.ordinal()) + 1),
-                  RANDOM.nextInt(1, 28)));
-              entity.setGender(Player.Gender.valueOf(faker.demographic().sex().toUpperCase()));
-              return entity;
-            })
+        repository.saveAll(IntStream.range(0, 20)
+            .mapToObj(
+                value -> new Player.Builder()
+                    .firstName(faker.name().firstName())
+                    .lastName(faker.name().lastName())
+                    .birthDate(LocalDate.of(RANDOM.nextInt(1991, 2001),
+                        Month.of(RANDOM.nextInt(Month.JANUARY.ordinal(), Month.DECEMBER.ordinal()) + 1),
+                        RANDOM.nextInt(1, 28)))
+                    .gender(Player.Gender.valueOf(faker.demographic().sex().toUpperCase()))
+                    .build()
+            )
             .toList()
         );
-        LOGGER.info(() -> "Generate players:%n%s".formatted(repository.findAll().stream().map(Player::toString).collect(Collectors.joining(NEW_LINE))));
+        repository.findAll().stream().filter(player -> RANDOM.nextDouble() < 0.2)
+            .forEach(player -> repository.save(new Player.Builder(player).surName(faker.funnyName().name()).build()));
+        LOGGER.info(() ->
+            "Players found:%n%s".formatted(repository.findAll().stream().map(Player::toString)
+                .collect(Collectors.joining(NEW_LINE))));
+      }
+      else {
+        LOGGER.info(() -> "Use existing data, found %d players".formatted(repository.count()));
       }
     };
   }

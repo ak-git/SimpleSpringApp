@@ -1,6 +1,7 @@
 package com.ak.spring.controller;
 
 import java.util.List;
+import java.util.UUID;
 
 import com.ak.spring.Application;
 import com.ak.spring.data.entity.Person;
@@ -11,8 +12,6 @@ import com.ak.util.Strings;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -50,6 +49,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @EntityScan(basePackages = "com.ak.spring.data.entity")
 @EnableWebMvc
 class PersonControllerTest {
+  private static final String ADMIN = "adminPersonControllerTest";
+  private static final String USER = "userPersonControllerTest";
+  private static final String USER_UNKNOWN = "unknownUser";
   @Autowired
   private MockMvc mvc;
   @Autowired
@@ -63,31 +65,29 @@ class PersonControllerTest {
 
   @BeforeEach
   void setUp() {
-    repository.deleteAll();
-    repository.save(new Person("admin", encoder.encode("password"), Person.Role.ADMIN));
-    repository.save(new Person("user", encoder.encode(Strings.EMPTY), Person.Role.USER));
+    repository.save(new Person(ADMIN, encoder.encode("password"), Person.Role.ADMIN));
+    repository.save(new Person(USER, encoder.encode(Strings.EMPTY), Person.Role.USER));
   }
 
   @Test
-  @WithMockUser(username = "admin", roles = "ADMIN")
+  @WithMockUser(username = ADMIN, roles = "ADMIN")
   void testLoginGetAll() throws Exception {
     assertNotNull(checkUnauthorizedOk(MockMvcRequestBuilders.get("/controller/persons/")));
   }
 
   @Test
   void testNoLoginGetByName() throws Exception {
-    assertNotNull(checkUnauthorizedOk(MockMvcRequestBuilders.get("/controller/persons/user")));
+    assertNotNull(checkUnauthorizedOk(MockMvcRequestBuilders.get("/controller/persons/%s".formatted(USER))));
     assertNotNull(
-        mvc.perform(MockMvcRequestBuilders.get("/controller/persons/user2").with(csrf()))
+        mvc.perform(MockMvcRequestBuilders.get("/controller/persons/%s".formatted(USER_UNKNOWN)).with(csrf()))
             .andDo(print()).andExpect(status().isNoContent())
     );
   }
 
-  @ParameterizedTest
-  @ValueSource(strings = {"username", "something"})
-  void testNoLoginPost(@NonNull String userName) throws Exception {
+  @Test
+  void testNoLoginPost() throws Exception {
     assertNotNull(checkUnauthorized(MockMvcRequestBuilders.post("/controller/persons/")
-        .content(userName)
+        .content(USER_UNKNOWN)
         .contentType(MediaType.APPLICATION_JSON)
     ));
   }
@@ -105,49 +105,65 @@ class PersonControllerTest {
     return mvc.perform(requestBuilder.with(csrf())).andDo(print()).andExpect(status().isOk());
   }
 
-  @ParameterizedTest
-  @ValueSource(strings = {"username", "something"})
-  @WithMockUser(username = "admin", roles = "ADMIN")
-  void testCreate(@NonNull String userName) throws Exception {
+  @Test
+  @WithMockUser(username = ADMIN, roles = "ADMIN")
+  void testCreate() throws Exception {
     int size = list().size();
+    String user = "%s%s".formatted(USER_UNKNOWN, UUID.randomUUID().toString());
     assertNotNull(check(MockMvcRequestBuilders.post("/controller/persons/")
-            .content(userName)
+            .content(user)
             .contentType(MediaType.APPLICATION_JSON).with(csrf()),
-        userName
+        user
     ));
     assertThat(list()).hasSize(size + 1);
   }
 
   @Test
   void testPut() throws Exception {
-    assertNotNull(mvc.perform(MockMvcRequestBuilders.put("/controller/persons/invalidUser")
+    assertNotNull(mvc.perform(MockMvcRequestBuilders.put("/controller/persons/%s".formatted(USER_UNKNOWN))
         .content("password")
         .contentType(MediaType.APPLICATION_JSON)
         .with(csrf())).andDo(print()).andExpect(status().isNoContent()));
 
-    assertNotNull(checkUnauthorizedOk(MockMvcRequestBuilders.put("/controller/persons/user")
+    assertNotNull(checkUnauthorizedOk(MockMvcRequestBuilders.put("/controller/persons/%s".formatted(USER))
         .content("password")
         .contentType(MediaType.APPLICATION_JSON)
     ));
-    assertNotNull(mvc.perform(MockMvcRequestBuilders.put("/controller/persons/user")
-        .content("password2")
+    assertNotNull(mvc.perform(MockMvcRequestBuilders.put("/controller/persons/%s".formatted(USER))
+        .content("newPassword")
         .contentType(MediaType.APPLICATION_JSON)
         .with(csrf())).andDo(print()).andExpect(status().isNoContent()));
   }
 
-  @ParameterizedTest
-  @ValueSource(strings = {"username", "something"})
-  @WithMockUser(username = "admin", roles = "ADMIN")
-  void testDelete(@NonNull String userName) throws Exception {
+  @Test
+  @WithMockUser(username = ADMIN, roles = "ADMIN")
+  void testDelete() throws Exception {
     int size = list().size();
-    assertThatNoException().isThrownBy(() -> userDetailsService.loadUserByUsername("admin"));
+    assertThatNoException().isThrownBy(() -> userDetailsService.loadUserByUsername(ADMIN));
+    String user = "%s%s".formatted(USER_UNKNOWN, UUID.randomUUID().toString());
     assertNotNull(
-        mvc.perform(MockMvcRequestBuilders.delete("/controller/persons/%s".formatted(userName)).with(csrf()))
+        mvc.perform(MockMvcRequestBuilders.delete("/controller/persons/%s".formatted(user)).with(csrf()))
             .andDo(print())
             .andExpect(status().isAccepted())
     );
-    assertThatExceptionOfType(UsernameNotFoundException.class).isThrownBy(() -> userDetailsService.loadUserByUsername(userName));
+    assertThatExceptionOfType(UsernameNotFoundException.class).isThrownBy(() -> userDetailsService.loadUserByUsername(user));
     assertThat(list()).hasSize(size);
+    assertNotNull(
+        mvc.perform(MockMvcRequestBuilders.post("/controller/persons/")
+                .content(user)
+                .contentType(MediaType.APPLICATION_JSON).with(csrf()))
+            .andDo(print())
+            .andExpect(status().isOk())
+    );
+
+    size = list().size();
+    assertNotNull(
+        mvc.perform(MockMvcRequestBuilders.delete("/controller/persons/%s".formatted(user)).with(csrf()))
+            .andDo(print())
+            .andExpect(status().isAccepted())
+    );
+    assertThatExceptionOfType(UsernameNotFoundException.class).isThrownBy(() -> userDetailsService.loadUserByUsername(user));
+    assertThat(list()).hasSize(size - 1);
   }
 
   @NonNull

@@ -38,7 +38,7 @@ class PlayerRepositoryTest {
       assertThat(players).isNotEmpty();
       Player p1 = players.get(0);
       Player p2 = players.get(1);
-      Player p3 = new Player(p1.getUUID());
+      Player p3 = new Player.Builder(p1.getUUID()).build();
       assertThat(p1).isNotEqualTo(p2).isNotEqualTo(p3).isNotEqualTo(new Object()).isEqualTo(p1);
       assertThat(new Object()).isNotEqualTo(p1);
       assertThat(p1).doesNotHaveSameHashCodeAs(p2).doesNotHaveSameHashCodeAs(p3).hasSameHashCodeAs(p1);

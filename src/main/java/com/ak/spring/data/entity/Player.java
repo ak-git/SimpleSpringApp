@@ -20,14 +20,14 @@ public final class Player extends AbstractRevisionable {
     MALE, FEMALE
   }
 
-  private String firstName = Strings.EMPTY;
-  private String surName = Strings.EMPTY;
-  private String lastName = Strings.EMPTY;
+  private String firstName;
+  private String surName;
+  private String lastName;
   @JsonDeserialize(using = LocalDateDeserializer.class)
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-  private LocalDate birthDate = LocalDate.EPOCH;
+  private LocalDate birthDate;
   @Convert(converter = GenderConverter.class)
-  private Gender gender = Gender.MALE;
+  private Gender gender;
 
   private static class GenderConverter implements AttributeConverter<Gender, String> {
     @Override
@@ -42,30 +42,16 @@ public final class Player extends AbstractRevisionable {
   }
 
   public Player() {
+    this(new Builder());
   }
 
-  public Player(@NonNull UUID uuid) {
-    super(uuid);
-  }
-
-  public void setFirstName(@NonNull String firstName) {
-    this.firstName = firstName.strip();
-  }
-
-  public void setSurName(@NonNull String surName) {
-    this.surName = surName.strip();
-  }
-
-  public void setLastName(@NonNull String lastName) {
-    this.lastName = lastName.strip();
-  }
-
-  public void setBirthDate(@NonNull LocalDate birthDate) {
-    this.birthDate = birthDate;
-  }
-
-  public void setGender(@NonNull Gender gender) {
-    this.gender = gender;
+  private Player(@NonNull Builder b) {
+    super(b.uuid);
+    firstName = b.firstName;
+    surName = b.surName;
+    lastName = b.lastName;
+    birthDate = b.birthDate;
+    gender = b.gender;
   }
 
   @NonNull
@@ -111,5 +97,60 @@ public final class Player extends AbstractRevisionable {
   @Override
   public String toString() {
     return "Player{%s, '%s %s %s', %s, %s}".formatted(super.toString(), firstName, surName, lastName, birthDate, gender);
+  }
+
+  public static class Builder {
+    private final UUID uuid;
+    private String firstName = Strings.EMPTY;
+    private String surName = Strings.EMPTY;
+    private String lastName = Strings.EMPTY;
+    private LocalDate birthDate = LocalDate.EPOCH;
+    private Gender gender = Gender.MALE;
+
+    public Builder() {
+      this(UUID.randomUUID());
+    }
+
+    public Builder(@NonNull UUID uuid) {
+      this.uuid = uuid;
+    }
+
+    public Builder(@NonNull Player player) {
+      uuid = player.getUUID();
+      firstName = player.firstName;
+      surName = player.surName;
+      lastName = player.lastName;
+      birthDate = player.birthDate;
+      gender = player.gender;
+    }
+
+    public Builder firstName(String firstName) {
+      this.firstName = Strings.emptyIfNull(firstName);
+      return this;
+    }
+
+    public Builder surName(String surName) {
+      this.surName = Strings.emptyIfNull(surName);
+      return this;
+    }
+
+    public Builder lastName(String lastName) {
+      this.lastName = Strings.emptyIfNull(lastName);
+      return this;
+    }
+
+    public Builder birthDate(LocalDate birthDate) {
+      this.birthDate = Optional.ofNullable(birthDate).orElse(LocalDate.EPOCH);
+      return this;
+    }
+
+    public Builder gender(Gender gender) {
+      this.gender = Optional.ofNullable(gender).orElse(Gender.MALE);
+      return this;
+    }
+
+    public Player build() {
+      return new Player(this);
+    }
   }
 }

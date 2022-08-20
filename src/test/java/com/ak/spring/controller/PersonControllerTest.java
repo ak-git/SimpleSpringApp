@@ -2,6 +2,7 @@ package com.ak.spring.controller;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import com.ak.spring.Application;
 import com.ak.spring.data.entity.Person;
@@ -12,6 +13,8 @@ import com.ak.util.Strings;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -51,7 +54,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class PersonControllerTest {
   private static final String ADMIN = "adminPersonControllerTest";
   private static final String USER = "userPersonControllerTest";
-  private static final String USER_UNKNOWN = "unknownUser";
   @Autowired
   private MockMvc mvc;
   @Autowired
@@ -75,19 +77,21 @@ class PersonControllerTest {
     assertNotNull(checkUnauthorizedOk(MockMvcRequestBuilders.get("/controller/persons/")));
   }
 
-  @Test
-  void testNoLoginGetByName() throws Exception {
+  @ParameterizedTest
+  @MethodSource("unknownUser")
+  void testNoLoginGetByName(@NonNull String u) throws Exception {
     assertNotNull(checkUnauthorizedOk(MockMvcRequestBuilders.get("/controller/persons/%s".formatted(USER))));
     assertNotNull(
-        mvc.perform(MockMvcRequestBuilders.get("/controller/persons/%s".formatted(USER_UNKNOWN)).with(csrf()))
+        mvc.perform(MockMvcRequestBuilders.get("/controller/persons/%s".formatted(u)).with(csrf()))
             .andDo(print()).andExpect(status().isNoContent())
     );
   }
 
-  @Test
-  void testNoLoginPost() throws Exception {
+  @ParameterizedTest
+  @MethodSource("unknownUser")
+  void testNoLoginPost(@NonNull String u) throws Exception {
     assertNotNull(checkUnauthorized(MockMvcRequestBuilders.post("/controller/persons/")
-        .content(USER_UNKNOWN)
+        .content(u)
         .contentType(MediaType.APPLICATION_JSON)
     ));
   }
@@ -105,22 +109,23 @@ class PersonControllerTest {
     return mvc.perform(requestBuilder.with(csrf())).andDo(print()).andExpect(status().isOk());
   }
 
-  @Test
+  @ParameterizedTest
+  @MethodSource("unknownUser")
   @WithMockUser(username = ADMIN, roles = "ADMIN")
-  void testCreate() throws Exception {
+  void testCreate(@NonNull String u) throws Exception {
     int size = list().size();
-    String user = "%s%s".formatted(USER_UNKNOWN, UUID.randomUUID().toString());
     assertNotNull(check(MockMvcRequestBuilders.post("/controller/persons/")
-            .content(user)
+            .content(u)
             .contentType(MediaType.APPLICATION_JSON).with(csrf()),
-        user
+        u
     ));
     assertThat(list()).hasSize(size + 1);
   }
 
-  @Test
-  void testPut() throws Exception {
-    assertNotNull(mvc.perform(MockMvcRequestBuilders.put("/controller/persons/%s".formatted(USER_UNKNOWN))
+  @ParameterizedTest
+  @MethodSource("unknownUser")
+  void testPut(@NonNull String u) throws Exception {
+    assertNotNull(mvc.perform(MockMvcRequestBuilders.put("/controller/persons/%s".formatted(u))
         .content("password")
         .contentType(MediaType.APPLICATION_JSON)
         .with(csrf())).andDo(print()).andExpect(status().isNoContent()));
@@ -135,12 +140,13 @@ class PersonControllerTest {
         .with(csrf())).andDo(print()).andExpect(status().isNoContent()));
   }
 
-  @Test
+  @ParameterizedTest
+  @MethodSource("unknownUser")
   @WithMockUser(username = ADMIN, roles = "ADMIN")
-  void testDelete() throws Exception {
+  void testDelete(@NonNull String u) throws Exception {
     int size = list().size();
     assertThatNoException().isThrownBy(() -> userDetailsService.loadUserByUsername(ADMIN));
-    String user = "%s%s".formatted(USER_UNKNOWN, UUID.randomUUID().toString());
+    String user = "%s%s".formatted(u, UUID.randomUUID().toString());
     assertNotNull(
         mvc.perform(MockMvcRequestBuilders.delete("/controller/persons/%s".formatted(user)).with(csrf()))
             .andDo(print())
@@ -188,5 +194,9 @@ class PersonControllerTest {
       assertThat(encoder.matches(Strings.EMPTY, userDetails.getPassword())).isTrue();
     });
     return mapper.reader().readValue(response.getContentAsString(), Person.class);
+  }
+
+  private static Stream<String> unknownUser() {
+    return Stream.of("unknownUser" + UUID.randomUUID());
   }
 }

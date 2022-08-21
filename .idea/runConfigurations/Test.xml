@@ -3,11 +3,11 @@
     <module name="SimpleSpringApp.test" />
     <extension name="coverage">
       <pattern>
-        <option name="PATTERN" value="com.ak.spring.*" />
+        <option name="PATTERN" value="com.ak.*" />
         <option name="ENABLED" value="true" />
       </pattern>
     </extension>
-    <option name="PACKAGE_NAME" value="com.ak.spring" />
+    <option name="PACKAGE_NAME" value="com.ak" />
     <option name="MAIN_CLASS_NAME" value="" />
     <option name="METHOD_NAME" value="" />
     <option name="TEST_OBJECT" value="package" />

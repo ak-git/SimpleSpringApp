@@ -5,7 +5,9 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.Supplier;
 
+import com.ak.spring.data.entity.Person;
 import com.ak.spring.data.entity.Player;
+import com.ak.spring.data.repository.PersonRepository;
 import com.ak.spring.data.repository.PlayerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -25,7 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/controller/players")
 public final class PlayerController {
-  public record PlayerRecord(String firstName, String surName, String lastName,
+  public record PlayerRecord(String ownerName, String firstName, String surName, String lastName,
                              LocalDate birthDate, Player.Gender gender) {
     @NonNull
     Player toPlayer(@NonNull Supplier<Player.Builder> b) {
@@ -34,10 +36,12 @@ public final class PlayerController {
   }
 
   private final PlayerRepository repository;
+  private final PersonRepository personRepository;
 
   @Autowired
-  public PlayerController(@NonNull PlayerRepository repository) {
+  public PlayerController(@NonNull PlayerRepository repository, @NonNull PersonRepository personRepository) {
     this.repository = repository;
+    this.personRepository = personRepository;
   }
 
   @GetMapping("/history/{uuid}")
@@ -66,20 +70,20 @@ public final class PlayerController {
   @ResponseStatus(HttpStatus.OK)
   @NonNull
   public Player create(@RequestBody @NonNull PlayerRecord p) {
-    return repository.save(p.toPlayer(Player.Builder::new));
+    return repository.save(p.toPlayer(() -> new Player.Builder(personRepository.findByUUID(Person.nameToUUID(p.ownerName)).orElse(null), UUID.randomUUID())));
   }
 
   @PutMapping("/{uuid}")
   @ResponseStatus(HttpStatus.OK)
   @NonNull
   public Player update(@PathVariable("uuid") @NonNull UUID uuid, @RequestBody @NonNull PlayerRecord p) {
-    return repository.save(p.toPlayer(() -> new Player.Builder(uuid)));
+    return repository.save(p.toPlayer(() -> new Player.Builder(personRepository.findByUUID(Person.nameToUUID(p.ownerName)).orElse(null), uuid)));
   }
 
   @DeleteMapping("/{uuid}")
   @ResponseStatus(HttpStatus.ACCEPTED)
   @NonNull
   public Player delete(@PathVariable("uuid") @NonNull UUID uuid) {
-    return repository.save(new Player.Builder(uuid).build());
+    return repository.save(new Player.Builder(null, uuid).build());
   }
 }

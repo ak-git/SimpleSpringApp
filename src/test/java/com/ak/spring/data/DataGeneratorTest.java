@@ -1,6 +1,8 @@
 package com.ak.spring.data;
 
 import com.ak.spring.Application;
+import com.ak.spring.security.PersonDetailsService;
+import com.ak.spring.security.SpringSecurityConfig;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +13,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 import static org.assertj.core.api.Assertions.assertThatNoException;
 
-@SpringBootTest(classes = {Application.class, DataGenerator.class})
+@SpringBootTest(classes = {Application.class, SpringSecurityConfig.class, PersonDetailsService.class, DataGenerator.class})
 @EnableJpaRepositories(basePackages = "com.ak.spring.data.repository")
 @EntityScan(basePackages = "com.ak.spring.data.entity")
 class DataGeneratorTest {

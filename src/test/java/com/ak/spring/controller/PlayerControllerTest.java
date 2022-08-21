@@ -91,13 +91,15 @@ class PlayerControllerTest {
 
   @ParameterizedTest
   @MethodSource("player")
-  @WithMockUser(roles = {"ADMIN", "USER"})
+  @WithMockUser(username = "adminTestGetHistoryByUUID", roles = {"ADMIN", "USER"})
   void testGetHistoryByUUID(@NonNull PlayerController.PlayerRecord playerRecord) throws Exception {
     Player player = create(playerRecord);
     PlayerController.PlayerRecord second = new PlayerController.PlayerRecord(
+        "adminTestGetHistoryByUUID",
         playerRecord.firstName(), "second", playerRecord.lastName(), LocalDate.parse("1981-07-03"), Player.Gender.MALE);
     Player p2 = update(player.getUUID(), second);
     PlayerController.PlayerRecord third = new PlayerController.PlayerRecord(
+        "adminTestGetHistoryByUUID",
         playerRecord.firstName(), "third", playerRecord.lastName(), LocalDate.parse("1981-07-03"), Player.Gender.MALE);
     Player p3 = update(player.getUUID(), third);
 
@@ -139,11 +141,11 @@ class PlayerControllerTest {
 
   @ParameterizedTest
   @MethodSource("player")
-  @WithMockUser(roles = {"ADMIN", "USER"})
+  @WithMockUser(username = "adminTestUpdate", roles = {"ADMIN", "USER"})
   void testUpdate(@NonNull PlayerController.PlayerRecord playerRecord) throws Exception {
     int size = list().size();
     Player player1 = create(playerRecord);
-    PlayerController.PlayerRecord playerRecord2 = new PlayerController.PlayerRecord(
+    PlayerController.PlayerRecord playerRecord2 = new PlayerController.PlayerRecord("adminTestUpdate",
         playerRecord.firstName(), "V2", playerRecord.lastName(), LocalDate.parse("1981-07-03"), Player.Gender.MALE
     );
     Player player2 = update(player1.getUUID(), playerRecord2);
@@ -154,7 +156,7 @@ class PlayerControllerTest {
 
   @ParameterizedTest
   @MethodSource("player")
-  @WithMockUser(roles = {"ADMIN", "USER"})
+  @WithMockUser(username = "adminTestDelete", roles = {"ADMIN", "USER"})
   void testDelete(@NonNull PlayerController.PlayerRecord playerRecord) throws Exception {
     int size = list().size();
     UUID uuid = create(playerRecord).getUUID();
@@ -166,7 +168,7 @@ class PlayerControllerTest {
             .andExpect(status().isAccepted())
             .andExpect(jsonPath("$.uuid", notNullValue()))
     );
-    var empty = new PlayerController.PlayerRecord(Strings.EMPTY, Strings.EMPTY, Strings.EMPTY, LocalDate.EPOCH, Player.Gender.MALE);
+    var empty = new PlayerController.PlayerRecord("adminTestDelete", Strings.EMPTY, Strings.EMPTY, Strings.EMPTY, LocalDate.EPOCH, Player.Gender.MALE);
     assertThat(checkHistory(uuid, empty, playerRecord)).hasSize(2);
     assertNotNull(
         mvc.perform(MockMvcRequestBuilders
@@ -247,6 +249,7 @@ class PlayerControllerTest {
 
   private static Stream<PlayerController.PlayerRecord> player() {
     return Stream.of(new PlayerController.PlayerRecord(
+        "someone",
         "Alexander", "V", "K", LocalDate.parse("1981-07-03"), Player.Gender.MALE)
     );
   }

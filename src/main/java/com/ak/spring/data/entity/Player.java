@@ -7,9 +7,11 @@ import java.util.UUID;
 import javax.persistence.AttributeConverter;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
+import javax.persistence.ManyToOne;
 
 import com.ak.util.Strings;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import org.springframework.lang.NonNull;
@@ -28,6 +30,9 @@ public final class Player extends AbstractRevisionable {
   private LocalDate birthDate;
   @Convert(converter = GenderConverter.class)
   private Gender gender;
+  @ManyToOne
+  @JsonIgnore
+  private Person owner;
 
   private static class GenderConverter implements AttributeConverter<Gender, String> {
     @Override
@@ -42,11 +47,12 @@ public final class Player extends AbstractRevisionable {
   }
 
   public Player() {
-    this(new Builder());
+    this(new Builder(null, UUID.randomUUID()));
   }
 
   private Player(@NonNull Builder b) {
     super(b.uuid);
+    owner = b.owner;
     firstName = b.firstName;
     surName = b.surName;
     lastName = b.lastName;
@@ -96,10 +102,12 @@ public final class Player extends AbstractRevisionable {
 
   @Override
   public String toString() {
-    return "Player{%s, '%s %s %s', %s, %s}".formatted(super.toString(), firstName, surName, lastName, birthDate, gender);
+    return "Player{%s, '%s %s %s', %s, %s, owner=%s}".formatted(super.toString(), firstName, surName, lastName, birthDate, gender,
+        Optional.ofNullable(owner).map(Person::getName).orElse(Strings.EMPTY));
   }
 
   public static class Builder {
+    private final Person owner;
     private final UUID uuid;
     private String firstName = Strings.EMPTY;
     private String surName = Strings.EMPTY;
@@ -107,21 +115,18 @@ public final class Player extends AbstractRevisionable {
     private LocalDate birthDate = LocalDate.EPOCH;
     private Gender gender = Gender.MALE;
 
-    public Builder() {
-      this(UUID.randomUUID());
-    }
-
-    public Builder(@NonNull UUID uuid) {
+    public Builder(Person owner, @NonNull UUID uuid) {
+      this.owner = owner;
       this.uuid = uuid;
     }
 
-    public Builder(@NonNull Player player) {
-      uuid = player.getUUID();
+    public Builder copy(@NonNull Player player) {
       firstName = player.firstName;
       surName = player.surName;
       lastName = player.lastName;
       birthDate = player.birthDate;
       gender = player.gender;
+      return this;
     }
 
     public Builder firstName(String firstName) {

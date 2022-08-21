@@ -39,13 +39,13 @@ class PlayerControllerIntegrationTest extends AbstractControllerIntegrationTest 
   void index() {
     int size = withAuth(USER).getForObject("/controller/players/", Player[].class).length;
     PlayerController.PlayerRecord playerRecord = new PlayerController.PlayerRecord(
-        "Alexander", Strings.EMPTY, Strings.EMPTY, LocalDate.parse("1981-07-03"), Player.Gender.MALE);
+        USER, "Alexander", Strings.EMPTY, Strings.EMPTY, LocalDate.parse("1981-07-03"), Player.Gender.MALE);
     Player player = withAuth(USER).postForObject("/controller/players/", playerRecord, Player.class);
     checkEquals(player, playerRecord);
     assertThat(withAuth(USER).getForObject("/controller/players/", Player[].class)).hasSize(size + 1);
 
     PlayerController.PlayerRecord playerRecord2 = new PlayerController.PlayerRecord(
-        "Alexander", "V2", "K2", LocalDate.parse("1981-07-03"), Player.Gender.MALE);
+        USER, "Alexander", "V2", "K2", LocalDate.parse("1981-07-03"), Player.Gender.MALE);
     withAuth(USER).put("/controller/players/%s".formatted(player.getUUID()), playerRecord2);
     Player player2 = withAuth(USER).getForObject("/controller/players/%s".formatted(player.getUUID()), Player.class);
     checkEquals(player2, playerRecord2);

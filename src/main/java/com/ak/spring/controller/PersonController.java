@@ -2,6 +2,8 @@ package com.ak.spring.controller;
 
 import java.util.List;
 
+import javax.servlet.http.HttpServletResponse;
+
 import com.ak.spring.data.entity.Person;
 import com.ak.spring.data.repository.PersonRepository;
 import com.ak.util.Strings;
@@ -10,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -38,7 +41,8 @@ public final class PersonController {
   @GetMapping("/")
   @ResponseBody
   @NonNull
-  public List<Person> list() {
+  public List<Person> list(@NonNull CsrfToken token, @NonNull HttpServletResponse response) {
+    response.setHeader(token.getHeaderName(), token.getToken());
     return repository.findAllPersons();
   }
 

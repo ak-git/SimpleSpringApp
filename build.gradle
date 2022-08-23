@@ -40,7 +40,7 @@ jacoco {
 ext {
     javaVersion = JavaVersion.VERSION_18
     h2 = 'com.h2database:h2:2.1.214'
-    postgres = 'org.postgresql:postgresql:42.4.1'
+    postgres = 'org.postgresql:postgresql:42.4.2'
     faker = 'com.github.javafaker:javafaker:1.0.2'
 }
 

@@ -3,7 +3,7 @@ FROM openjdk:18.0.2
 # Create a new app directory for my application files
 RUN mkdir /app
 
-ENV JAR_TO_COPY=SimpleSpringApp-2022.08.24.jar
+ENV JAR_TO_COPY=SimpleSpringApp-2022.08.27.jar
 # Copy the app files from host machine to image filesystem
 COPY build/libs/${JAR_TO_COPY} /app
 

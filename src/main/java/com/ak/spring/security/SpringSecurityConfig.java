@@ -47,7 +47,7 @@ public class SpringSecurityConfig {
         .antMatchers(HttpMethod.DELETE, PLAYER_USER_PATTERN).hasRole(Person.Role.USER.name())
         .and()
         .formLogin().disable()
-        .csrf().csrfTokenRepository(csrfTokenRepository());
+        .csrf().disable();
     return http.build();
   }
 }

@@ -37,7 +37,7 @@ Find **XSRF-TOKEN** in `cookie.txt`
 
 ### Delete user
 
-`curl -X DELETE localhost:8080/controller/persons/5670ee20-d8ac-3075-b402-9a8b4839a454
+`curl -X DELETE localhost:8080/controller/persons/user1
 -H "Cookie: XSRF-TOKEN=fabe1658-6e15-4cbf-b0bd-538bafad6cd8" -H "X-XSRF-TOKEN:fabe1658-6e15-4cbf-b0bd-538bafad6cd8" -u admin:password`
 
 ## Player management

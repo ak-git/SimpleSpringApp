@@ -27,8 +27,10 @@ public class PersonDetailsService implements UserDetailsService {
     if (repository.count() == 0) {
       LOGGER.info(() -> "Generate users:");
       repository.save(new Person("admin", encoder.encode("password"), Person.Role.ADMIN));
+      repository.save(new Person("user", encoder.encode("password"), Person.Role.USER));
       repository.save(new Person("user1", encoder.encode("password1"), Person.Role.USER));
       repository.save(new Person("user2", encoder.encode("password2"), Person.Role.USER));
+      repository.save(new Person("user3", encoder.encode("password3"), Person.Role.USER));
     }
     LOGGER.info(() -> "Users:%n%s".formatted(repository.findAll().stream().map(Person::toString).collect(Collectors.joining(NEW_LINE))));
   }

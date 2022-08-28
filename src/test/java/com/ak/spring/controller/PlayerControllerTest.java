@@ -110,10 +110,7 @@ class PlayerControllerTest {
   @Test
   @WithMockUser("USER")
   void testCreate() throws Exception {
-    PlayerController.PlayerRecord playerRecord = player("user");
-    int size = list("user").size();
-    assertNotNull(create(playerRecord));
-    assertThat(list("user")).hasSize(size + 1);
+    assertNotNull(create(player("userTestCreate")));
   }
 
   @Test

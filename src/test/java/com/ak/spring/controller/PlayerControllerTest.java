@@ -3,7 +3,6 @@ package com.ak.spring.controller;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Stream;
 
 import com.ak.spring.Application;
 import com.ak.spring.data.entity.Player;
@@ -14,7 +13,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
@@ -67,9 +65,9 @@ class PlayerControllerTest {
     assertNotNull(checkUnauthorized(MockMvcRequestBuilders.get(address).accept(MediaType.APPLICATION_JSON)));
   }
 
-  @ParameterizedTest
-  @MethodSource("player")
-  void testNoLoginPostPut(@NonNull PlayerController.PlayerRecord playerRecord) throws Exception {
+  @Test
+  void testNoLoginPostPut() throws Exception {
+    PlayerController.PlayerRecord playerRecord = player("someone");
     assertNotNull(checkUnauthorized(MockMvcRequestBuilders.post("/controller/players/")
         .content(mapper.writeValueAsString(playerRecord))
         .contentType(MediaType.APPLICATION_JSON)
@@ -89,10 +87,10 @@ class PlayerControllerTest {
     return mvc.perform(requestBuilder.with(csrf())).andDo(print()).andExpect(status().isUnauthorized());
   }
 
-  @ParameterizedTest
-  @MethodSource("player")
+  @Test
   @WithMockUser(username = "adminTestGetHistoryByUUID", roles = {"ADMIN", "USER"})
-  void testGetHistoryByUUID(@NonNull PlayerController.PlayerRecord playerRecord) throws Exception {
+  void testGetHistoryByUUID() throws Exception {
+    PlayerController.PlayerRecord playerRecord = player("adminTestGetHistoryByUUID");
     Player player = create(playerRecord);
     PlayerController.PlayerRecord second = new PlayerController.PlayerRecord(
         "adminTestGetHistoryByUUID",
@@ -109,22 +107,10 @@ class PlayerControllerTest {
     assertThat(players[players.length - 1]).isEqualTo(player).isNotEqualTo(p2).isNotEqualTo(p3);
   }
 
-  @ParameterizedTest
-  @MethodSource("player")
+  @Test
   @WithMockUser("USER")
-  void testCreate(@NonNull PlayerController.PlayerRecord playerRecord) throws Exception {
-    int size = list().size();
-    assertNotNull(create(playerRecord));
-    assertThat(list()).hasSize(size + 1);
-  }
-
-  @ParameterizedTest
-  @MethodSource("player")
-  @WithMockUser("USER")
-  void testGet(@NonNull PlayerController.PlayerRecord playerRecord) throws Exception {
-    Player player1 = create(playerRecord);
-    Player player2 = getByUUID(player1.getUUID(), playerRecord);
-    assertThat(player1).isEqualTo(player2);
+  void testCreate() throws Exception {
+    assertNotNull(create(player("userTestCreate")));
   }
 
   @Test
@@ -132,18 +118,18 @@ class PlayerControllerTest {
   void testInvalidUUID() throws Exception {
     assertNotNull(
         mvc.perform(MockMvcRequestBuilders
-                .get("/controller/players/%s".formatted(UUID.randomUUID())).accept(MediaType.APPLICATION_JSON))
+                .get("/controller/players/%s".formatted("invalidUser")).accept(MediaType.APPLICATION_JSON))
             .andDo(print())
-            .andExpect(status().isNoContent())
-            .andExpect(content().string(Strings.EMPTY))
+            .andExpect(status().isOk())
+            .andExpect(content().string("[]"))
     );
   }
 
-  @ParameterizedTest
-  @MethodSource("player")
+  @Test
   @WithMockUser(username = "adminTestUpdate", roles = {"ADMIN", "USER"})
-  void testUpdate(@NonNull PlayerController.PlayerRecord playerRecord) throws Exception {
-    int size = list().size();
+  void testUpdate() throws Exception {
+    PlayerController.PlayerRecord playerRecord = player("adminTestUpdate");
+    int size = list("adminTestUpdate").size();
     Player player1 = create(playerRecord);
     PlayerController.PlayerRecord playerRecord2 = new PlayerController.PlayerRecord("adminTestUpdate",
         playerRecord.firstName(), "V2", playerRecord.lastName(), LocalDate.parse("1981-07-03"), Player.Gender.MALE
@@ -151,14 +137,14 @@ class PlayerControllerTest {
     Player player2 = update(player1.getUUID(), playerRecord2);
     assertThat(player1).isNotEqualTo(player2);
     assertThat(checkHistory(player1.getUUID(), playerRecord2, playerRecord)).hasSize(2);
-    assertThat(list()).hasSize(size + 1);
+    assertThat(list("adminTestUpdate")).hasSize(size);
   }
 
-  @ParameterizedTest
-  @MethodSource("player")
+  @Test
   @WithMockUser(username = "adminTestDelete", roles = {"ADMIN", "USER"})
-  void testDelete(@NonNull PlayerController.PlayerRecord playerRecord) throws Exception {
-    int size = list().size();
+  void testDelete() throws Exception {
+    PlayerController.PlayerRecord playerRecord = player("adminTestDelete");
+    int size = list("adminTestDelete").size();
     UUID uuid = create(playerRecord).getUUID();
     assertThat(checkHistory(uuid, playerRecord)).hasSize(1);
     assertNotNull(
@@ -170,14 +156,7 @@ class PlayerControllerTest {
     );
     var empty = new PlayerController.PlayerRecord("adminTestDelete", Strings.EMPTY, Strings.EMPTY, Strings.EMPTY, LocalDate.EPOCH, Player.Gender.MALE);
     assertThat(checkHistory(uuid, empty, playerRecord)).hasSize(2);
-    assertNotNull(
-        mvc.perform(MockMvcRequestBuilders
-                .get("/controller/players/%s".formatted(uuid)).accept(MediaType.APPLICATION_JSON))
-            .andDo(print())
-            .andExpect(status().isNoContent())
-            .andExpect(content().string(Strings.EMPTY))
-    );
-    assertThat(list()).hasSize(size);
+    assertThat(list("adminTestDelete")).hasSize(size);
   }
 
   @NonNull
@@ -190,17 +169,11 @@ class PlayerControllerTest {
   }
 
   @NonNull
-  private List<Player> list() throws Exception {
-    MockHttpServletResponse response = mvc.perform(MockMvcRequestBuilders.get("/controller/players/")
+  private List<Player> list(@NonNull String userName) throws Exception {
+    MockHttpServletResponse response = mvc.perform(MockMvcRequestBuilders.get("/controller/players/%s".formatted(userName))
             .contentType(MediaType.APPLICATION_JSON).with(csrf()))
         .andReturn().getResponse();
     return List.of(mapper.reader().readValue(response.getContentAsString(), Player[].class));
-  }
-
-  private Player getByUUID(@NonNull UUID uuid, @NonNull PlayerController.PlayerRecord playerRecord) throws Exception {
-    return check(MockMvcRequestBuilders.get("/controller/players/%s".formatted(uuid)).accept(MediaType.APPLICATION_JSON),
-        playerRecord
-    );
   }
 
   private Player update(@NonNull UUID uuid, @NonNull PlayerController.PlayerRecord playerRecord) throws Exception {
@@ -247,10 +220,9 @@ class PlayerControllerTest {
     return mapper.reader().readValue(actions.andReturn().getResponse().getContentAsString(), Player[].class);
   }
 
-  private static Stream<PlayerController.PlayerRecord> player() {
-    return Stream.of(new PlayerController.PlayerRecord(
-        "someone",
-        "Alexander", "V", "K", LocalDate.parse("1981-07-03"), Player.Gender.MALE)
-    );
+  private static PlayerController.PlayerRecord player(@NonNull String ownerName) {
+    return new PlayerController.PlayerRecord(
+        ownerName,
+        "Alexander", "V", "K", LocalDate.parse("1981-07-03"), Player.Gender.MALE);
   }
 }

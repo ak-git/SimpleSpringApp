@@ -11,7 +11,6 @@ import com.ak.spring.data.repository.PersonRepository;
 import com.ak.spring.data.repository.PlayerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -53,19 +52,11 @@ public final class PlayerController {
     return repository.historyForUUID(uuid);
   }
 
-  @GetMapping("/{uuid}")
+  @GetMapping("/{name}")
   @ResponseBody
   @NonNull
-  public ResponseEntity<Player> getByUUID(@PathVariable("uuid") @NonNull UUID uuid) {
-    return repository.findByUUID(uuid)
-        .map(p -> new ResponseEntity<>(p, HttpStatus.OK)).orElse(new ResponseEntity<>(HttpStatus.NO_CONTENT));
-  }
-
-  @GetMapping("/")
-  @ResponseBody
-  @NonNull
-  public List<Player> list() {
-    return repository.findAllPlayers();
+  public List<Player> list(@PathVariable("name") @NonNull String name) {
+    return repository.findAllPlayers(Person.nameToUUID(name));
   }
 
   @PostMapping("/")

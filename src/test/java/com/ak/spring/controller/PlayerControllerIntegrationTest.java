@@ -37,20 +37,17 @@ class PlayerControllerIntegrationTest extends AbstractControllerIntegrationTest 
 
   @Test
   void index() {
-    int size = withAuth(USER).getForObject("/controller/players/", Player[].class).length;
+    int size = withAuth(USER).getForObject("/controller/players/%s".formatted(USER), Player[].class).length;
     PlayerController.PlayerRecord playerRecord = new PlayerController.PlayerRecord(
         USER, "Alexander", Strings.EMPTY, Strings.EMPTY, LocalDate.parse("1981-07-03"), Player.Gender.MALE);
     Player player = withAuth(USER).postForObject("/controller/players/", playerRecord, Player.class);
     checkEquals(player, playerRecord);
-    assertThat(withAuth(USER).getForObject("/controller/players/", Player[].class)).hasSize(size + 1);
+    assertThat(withAuth(USER).getForObject("/controller/players/%s".formatted(USER), Player[].class)).hasSize(size + 1);
 
     PlayerController.PlayerRecord playerRecord2 = new PlayerController.PlayerRecord(
         USER, "Alexander", "V2", "K2", LocalDate.parse("1981-07-03"), Player.Gender.MALE);
     withAuth(USER).put("/controller/players/%s".formatted(player.getUUID()), playerRecord2);
-    Player player2 = withAuth(USER).getForObject("/controller/players/%s".formatted(player.getUUID()), Player.class);
-    checkEquals(player2, playerRecord2);
-    assertThat(player2).isNotEqualTo(player);
-    assertThat(withAuth(USER).getForObject("/controller/players/", Player[].class)).hasSize(size + 1);
+    assertThat(withAuth(USER).getForObject("/controller/players/%s".formatted(USER), Player[].class)).hasSize(size + 1);
 
     withAuth(USER).delete("/controller/players/%s".formatted(player.getUUID()));
     Player[] history = withAuth(ADMIN).getForObject("/controller/players/history/%s".formatted(player.getUUID()), Player[].class);
@@ -58,7 +55,7 @@ class PlayerControllerIntegrationTest extends AbstractControllerIntegrationTest 
     for (int i = 1; i < history.length; i++) {
       assertThat(history[i].getRevision()).isLessThan(history[i - 1].getRevision());
     }
-    assertThat(withAuth(USER).getForObject("/controller/players/", Player[].class)).hasSize(size);
+    assertThat(withAuth(USER).getForObject("/controller/players/%s".formatted(USER), Player[].class)).hasSize(size);
   }
 
   private void checkEquals(@NonNull Player player, @NonNull PlayerController.PlayerRecord playerRecord) {

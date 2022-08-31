@@ -1,12 +1,12 @@
 version: "3.9"
 services:
-  pgdb:
-    container_name: pgdb
+  db:
+    container_name: db
     image: postgres:14.5
     environment:
       POSTGRES_DB: "db"
-      POSTGRES_USER: ${POSTGRES_USER:-pguser}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-pgpass}
+      POSTGRES_USER: ${POSTGRES_USER:-admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-maddog}
       PGDATA: "/var/lib/postgresql/data/pgdata"
     volumes:
       - .:/var/lib/postgresql/data
@@ -15,7 +15,7 @@ services:
     networks:
       - db-net
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U pguser -d db" ]
+      test: [ "CMD-SHELL", "pg_isready -U admin -d db" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -32,14 +32,14 @@ services:
     image: dpage/pgadmin4
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin4@pgadmin.org}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-maddog}
       PGADMIN_CONFIG_SERVER_MODE: 'False'
     volumes:
       - ./pgadmin:/var/lib/pgadmin
     ports:
       - ${PGADMIN_PORT:-5050}:80
     depends_on:
-      - pgdb
+      - db
     networks:
       - db-net
     restart: unless-stopped
@@ -48,9 +48,9 @@ services:
     image: adminer
     restart: unless-stopped
     depends_on:
-      - pgdb
+      - db
     ports:
-      - "5080:8080"
+      - "5051:8080"
     networks:
       - db-net
 
@@ -62,16 +62,29 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      - pgdb
+      - db
     networks:
       - db-net
     restart: on-failure
     environment:
-      - WAIT_HOSTS=pgdb:5432, pgadmin:80, adminer:8080
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://pgdb:5432/db
-      - SPRING_DATASOURCE_USERNAME=pguser
-      - SPRING_DATASOURCE_PASSWORD=pgpass
+      - WAIT_HOSTS=db:5432, pgadmin:80, adminer:8080
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/db
+      - SPRING_DATASOURCE_USERNAME=admin
+      - SPRING_DATASOURCE_PASSWORD=maddog
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+
+  elephants:
+    container_name: elephants
+    image: a002k/elephants
+    ports:
+      - "80:80"
+    depends_on:
+      - simple-spring-app
+    networks:
+      - db-net
+    restart: on-failure
+    environment:
+      - WAIT_HOSTS=simple-spring-app:8080
 
 networks:
   db-net:

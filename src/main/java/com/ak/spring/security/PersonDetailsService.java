@@ -19,6 +19,7 @@ import static com.ak.util.Strings.NEW_LINE;
 @Service
 public class PersonDetailsService implements UserDetailsService {
   private static final Logger LOGGER = Logger.getLogger(PersonDetailsService.class.getName());
+  private static final String SIMPLE_PASSWORD = "123456";
   private final PersonRepository repository;
 
   @Autowired
@@ -26,11 +27,9 @@ public class PersonDetailsService implements UserDetailsService {
     this.repository = repository;
     if (repository.count() == 0) {
       LOGGER.info(() -> "Generate users:");
-      repository.save(new Person("admin", encoder.encode("password"), Person.Role.ADMIN));
-      repository.save(new Person("user", encoder.encode("password"), Person.Role.USER));
-      repository.save(new Person("user1", encoder.encode("password1"), Person.Role.USER));
-      repository.save(new Person("user2", encoder.encode("password2"), Person.Role.USER));
-      repository.save(new Person("user3", encoder.encode("password3"), Person.Role.USER));
+      repository.save(new Person("admin", encoder.encode("maddog"), Person.Role.ADMIN));
+      repository.save(new Person("user", encoder.encode(SIMPLE_PASSWORD), Person.Role.USER));
+      repository.save(new Person("user2", encoder.encode(SIMPLE_PASSWORD), Person.Role.USER));
     }
     LOGGER.info(() -> "Users:%n%s".formatted(repository.findAll().stream().map(Person::toString).collect(Collectors.joining(NEW_LINE))));
   }

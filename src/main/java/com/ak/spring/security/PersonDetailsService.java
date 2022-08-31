@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import com.ak.spring.data.entity.Person;
 import com.ak.spring.data.repository.PersonRepository;
+import com.ak.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 import org.springframework.security.core.userdetails.User;
@@ -19,7 +20,6 @@ import static com.ak.util.Strings.NEW_LINE;
 @Service
 public class PersonDetailsService implements UserDetailsService {
   private static final Logger LOGGER = Logger.getLogger(PersonDetailsService.class.getName());
-  private static final String SIMPLE_PASSWORD = "123456";
   private final PersonRepository repository;
 
   @Autowired
@@ -28,8 +28,8 @@ public class PersonDetailsService implements UserDetailsService {
     if (repository.count() == 0) {
       LOGGER.info(() -> "Generate users:");
       repository.save(new Person("admin", encoder.encode("maddog"), Person.Role.ADMIN));
-      repository.save(new Person("user", encoder.encode(SIMPLE_PASSWORD), Person.Role.USER));
-      repository.save(new Person("user2", encoder.encode(SIMPLE_PASSWORD), Person.Role.USER));
+      repository.save(new Person("user", encoder.encode(Strings.EMPTY), Person.Role.USER));
+      repository.save(new Person("user2", encoder.encode(Strings.EMPTY), Person.Role.USER));
     }
     LOGGER.info(() -> "Users:%n%s".formatted(repository.findAll().stream().map(Person::toString).collect(Collectors.joining(NEW_LINE))));
   }

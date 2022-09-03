@@ -7,12 +7,15 @@ import java.util.UUID;
 import javax.persistence.AttributeConverter;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 
+import com.ak.spring.data.listener.PreventModificationListener;
 import com.ak.util.Strings;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.lang.NonNull;
 
 @Entity
+@EntityListeners(PreventModificationListener.class)
 public final class Person extends AbstractRevisionable {
   public enum Role {
     ADMIN, USER, NONE

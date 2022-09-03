@@ -7,8 +7,10 @@ import java.util.UUID;
 import javax.persistence.AttributeConverter;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.ManyToOne;
 
+import com.ak.spring.data.listener.PreventModificationListener;
 import com.ak.util.Strings;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -17,6 +19,7 @@ import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import org.springframework.lang.NonNull;
 
 @Entity
+@EntityListeners(PreventModificationListener.class)
 public final class Player extends AbstractRevisionable {
   public enum Gender {
     MALE, FEMALE

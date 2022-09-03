@@ -6,11 +6,9 @@ import java.util.UUID;
 
 import com.ak.spring.Application;
 import com.ak.spring.data.entity.Player;
-import com.ak.spring.data.repository.PlayerRepository;
 import com.ak.spring.security.SpringSecurityConfig;
 import com.ak.util.Strings;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -51,13 +49,6 @@ class PlayerControllerTest {
   private MockMvc mvc;
   @Autowired
   private ObjectMapper mapper;
-  @Autowired
-  private PlayerRepository repository;
-
-  @BeforeEach
-  void setUp() {
-    repository.deleteAll();
-  }
 
   @ParameterizedTest
   @ValueSource(strings = {"/controller/players/history/", "/controller/players/"})

@@ -15,22 +15,25 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.lang.NonNull;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 @SpringBootTest(classes = {Application.class, PersonRepository.class, PlayerRepository.class})
 @EnableJpaRepositories(basePackages = "com.ak.spring.data.repository")
 @EntityScan(basePackages = "com.ak.spring.data.entity")
 class PreventModificationListenerTest {
   @Test
   void onPreUpdatePerson(@Autowired @NonNull PersonRepository repository) {
-    check(repository, new Person());
+    assertNotNull(check(repository, new Person()));
   }
 
   @Test
   void onPreUpdatePlayer(@Autowired @NonNull PlayerRepository repository) {
-    check(repository, new Player());
+    assertNotNull(check(repository, new Player()));
   }
 
-  private static <T, ID> void check(@NonNull CrudRepository<T, ID> repository, @NonNull T entity) {
-    repository.save(entity);
+  private static <T, ID> T check(@NonNull CrudRepository<T, ID> repository, @NonNull T entity) {
+    T t = repository.save(entity);
     Assertions.assertThatExceptionOfType(InvalidDataAccessApiUsageException.class).isThrownBy(repository::deleteAll);
+    return t;
   }
 }

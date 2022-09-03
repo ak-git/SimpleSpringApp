@@ -2,8 +2,26 @@ spring:
   main:
     web-application-type: servlet
     banner-mode: off
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
 logging:
   file.name: spring.log
   level:
     org:
       springframework: info
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: production
+  sql:
+    init:
+      platform: postgresql
+      mode: always
+  jpa:
+    defer-datasource-initialization: true
+    show-sql: false

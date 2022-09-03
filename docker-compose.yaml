@@ -71,7 +71,7 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/db
       - SPRING_DATASOURCE_USERNAME=admin
       - SPRING_DATASOURCE_PASSWORD=maddog
-      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SPRING_PROFILES_ACTIVE=production
 
   elephants:
     container_name: elephants

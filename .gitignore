@@ -21,5 +21,4 @@ CVS
 out/*
 .gradle
 /spring.log*
-/pgdata/
-/pgadmin/
+/data/

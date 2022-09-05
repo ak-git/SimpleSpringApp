@@ -18,7 +18,7 @@ down: `docker-compose down`
 
 ### List all users
 
-`$ curl localhost:8080/controller/persons/ -u admin:password -c cookie.txt`
+`$ curl localhost:8080/controller/persons/ -u admin:maddog -c cookie.txt`
 
 ### Find user by name
 
@@ -67,7 +67,7 @@ Find **XSRF-TOKEN** in `cookie.txt`
 
 ### History for player by id
 
-`$ curl localhost:8080/controller/players/history/ddba8655-4c9b-4760-81c0-e32448866550 -u admin:password`
+`$ curl localhost:8080/controller/players/history/ddba8655-4c9b-4760-81c0-e32448866550 -u admin:maddog`
 
 ### Delete player by id
 

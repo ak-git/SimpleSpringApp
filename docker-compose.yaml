@@ -9,7 +9,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-maddog}
       PGDATA: "/var/lib/postgresql/data/pgdata"
     volumes:
-      - .:/var/lib/postgresql/data
+      - ./data:/var/lib/postgresql/data
     networks:
       - db-net
     healthcheck:
@@ -33,7 +33,7 @@ services:
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-maddog}
       PGADMIN_CONFIG_SERVER_MODE: 'False'
     volumes:
-      - ./pgadmin:/var/lib/pgadmin
+      - ./data/pgadmin:/var/lib/pgadmin
     ports:
       - ${PGADMIN_PORT:-5050}:80
     depends_on:
@@ -52,6 +52,17 @@ services:
     networks:
       - db-net
 
+  elephants:
+    container_name: elephants
+    image: a002k/elephants
+    ports:
+      - "80:80"
+    depends_on:
+      - simple-spring-app
+    networks:
+      - db-net
+    restart: on-failure
+
   simple-spring-app:
     container_name: simple-spring-app
     image: a002k/simple-spring-app
@@ -63,29 +74,12 @@ services:
       - db-net
     restart: on-failure
     environment:
-      - WAIT_HOSTS=db:5432, pgadmin:80, adminer:8080
+      - WAIT_HOSTS=db:5432, pgadmin:80, adminer:8080, elephants:80
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/db
       - SPRING_DATASOURCE_USERNAME=admin
       - SPRING_DATASOURCE_PASSWORD=maddog
       - SPRING_PROFILES_ACTIVE=production
 
-  elephants:
-    container_name: elephants
-    image: a002k/elephants
-    ports:
-      - "80:80"
-    depends_on:
-      - simple-spring-app
-    networks:
-      - db-net
-    restart: on-failure
-    environment:
-      - WAIT_HOSTS=simple-spring-app:8080
-
 networks:
   db-net:
     driver: bridge
-
-volumes:
-  postgres:
-  pgadmin:

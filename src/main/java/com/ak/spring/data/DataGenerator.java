@@ -34,7 +34,7 @@ public class DataGenerator {
       if (repository.count() == 0) {
         List<Person> users = personRepository.findAllPersons().stream().filter(person -> person.getRole().equals(Person.Role.USER)).toList();
         Faker faker = new Faker(Locale.getDefault());
-        repository.saveAll(IntStream.range(0, 30)
+        repository.saveAll(IntStream.range(0, 15)
             .mapToObj(
                 ignore -> new Player.Builder(users.get(RANDOM.nextInt(users.size())), UUID.randomUUID())
                     .firstName(faker.name().firstName())

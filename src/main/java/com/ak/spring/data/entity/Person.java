@@ -21,11 +21,11 @@ public final class Person extends AbstractRevisionable {
     ADMIN, USER, NONE
   }
 
-  private String name = Strings.EMPTY;
+  private final String name;
   @JsonIgnore
-  private String password = Strings.EMPTY;
+  private final String password;
   @Convert(converter = RoleConverter.class)
-  private Role role = Role.NONE;
+  private final Role role;
 
   private static class RoleConverter implements AttributeConverter<Role, String> {
     @Override
@@ -40,6 +40,7 @@ public final class Person extends AbstractRevisionable {
   }
 
   public Person() {
+    this(Strings.EMPTY, Strings.EMPTY, Role.NONE);
   }
 
   public Person(@NonNull String name, @NonNull String password, @NonNull Role role) {

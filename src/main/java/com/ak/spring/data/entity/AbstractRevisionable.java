@@ -19,11 +19,11 @@ import org.springframework.lang.NonNull;
 abstract class AbstractRevisionable {
   @Id
   @Type(type = "uuid-char")
-  private UUID uuid;
+  private final UUID uuid;
   @Id
   @GeneratedValue(strategy = GenerationType.SEQUENCE)
   private long revision;
-  private ZonedDateTime created;
+  private final ZonedDateTime created;
 
   AbstractRevisionable() {
     this(UUID.randomUUID());

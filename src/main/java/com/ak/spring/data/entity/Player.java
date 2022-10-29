@@ -25,17 +25,17 @@ public final class Player extends AbstractRevisionable {
     MALE, FEMALE
   }
 
-  private String firstName;
-  private String surName;
-  private String lastName;
+  private final String firstName;
+  private final String surName;
+  private final String lastName;
   @JsonDeserialize(using = LocalDateDeserializer.class)
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-  private LocalDate birthDate;
+  private final LocalDate birthDate;
   @Convert(converter = GenderConverter.class)
-  private Gender gender;
+  private final Gender gender;
   @ManyToOne
   @JsonIgnore
-  private Person owner;
+  private final Person owner;
 
   private static class GenderConverter implements AttributeConverter<Gender, String> {
     @Override

@@ -123,15 +123,6 @@ public final class Player extends AbstractRevisionable {
       this.uuid = uuid;
     }
 
-    public Builder copy(@NonNull Player player) {
-      firstName = player.firstName;
-      surName = player.surName;
-      lastName = player.lastName;
-      birthDate = player.birthDate;
-      gender = player.gender;
-      return this;
-    }
-
     public Builder firstName(String firstName) {
       this.firstName = Strings.emptyIfNull(firstName);
       return this;

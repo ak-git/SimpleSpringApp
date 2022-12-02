@@ -5,14 +5,12 @@ import java.util.stream.Collectors;
 
 import com.ak.spring.data.entity.Person;
 import com.ak.spring.data.repository.PersonRepository;
-import com.ak.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import static com.ak.util.Strings.NEW_LINE;
@@ -23,14 +21,8 @@ public class PersonDetailsService implements UserDetailsService {
   private final PersonRepository repository;
 
   @Autowired
-  public PersonDetailsService(@NonNull PersonRepository repository, @NonNull PasswordEncoder encoder) {
+  public PersonDetailsService(@NonNull PersonRepository repository) {
     this.repository = repository;
-    if (repository.count() == 0) {
-      LOGGER.info(() -> "Generate users:");
-      repository.save(new Person("admin", encoder.encode("maddog"), Person.Role.ADMIN));
-      repository.save(new Person("user", encoder.encode(Strings.EMPTY), Person.Role.USER));
-      repository.save(new Person("user2", encoder.encode(Strings.EMPTY), Person.Role.USER));
-    }
     LOGGER.info(() -> "Users:%n%s".formatted(repository.findAll().stream().map(Person::toString).collect(Collectors.joining(NEW_LINE))));
   }
 

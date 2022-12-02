@@ -25,10 +25,6 @@ abstract class AbstractRevisionable {
   private long revision;
   private final ZonedDateTime created;
 
-  AbstractRevisionable() {
-    this(UUID.randomUUID());
-  }
-
   AbstractRevisionable(@NonNull UUID uuid) {
     this.uuid = uuid;
     created = ZonedDateTime.now();

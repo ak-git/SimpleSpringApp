@@ -1,4 +1,4 @@
-package com.ak.spring.data;
+package com.ak.spring.security;
 
 import java.util.List;
 import java.util.stream.IntStream;

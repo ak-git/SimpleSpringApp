@@ -23,11 +23,9 @@ module com.ak.spring {
   opens com.ak.spring to spring.core, com.fasterxml.jackson.databind;
   opens com.ak.spring.security to spring.core, spring.beans, spring.context;
   opens com.ak.spring.data.entity to spring.core, org.hibernate.orm.core, com.fasterxml.jackson.databind;
-  opens com.ak.spring.data to spring.core;
   opens com.ak.spring.data.id to spring.core, spring.beans, org.hibernate.orm.core;
   opens com.ak.spring.controller to spring.core, com.fasterxml.jackson.databind;
   opens com.ak.spring.data.listener to org.hibernate.orm.core;
-  exports com.ak.spring.data to spring.beans;
   exports com.ak.spring.controller to spring.beans, spring.web, com.fasterxml.jackson.databind;
   exports com.ak.spring.data.repository;
   exports com.ak.spring.data.entity;

@@ -41,7 +41,6 @@ ext {
     javaVersion = JavaVersion.VERSION_18
     h2 = 'com.h2database:h2:2.1.214'
     postgres = 'org.postgresql:postgresql:42.5.0'
-    faker = 'com.github.javafaker:javafaker:1.0.2'
 }
 
 wrapper {
@@ -81,9 +80,6 @@ allprojects {
         implementation 'org.springframework.boot:spring-boot-starter-web'
         implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
         implementation 'org.springframework.boot:spring-boot-starter-security'
-        implementation(faker) {
-            exclude group: 'org.yaml', module: 'snakeyaml'
-        }
         developmentOnly 'org.springframework.boot:spring-boot-devtools'
         runtimeOnly h2
         runtimeOnly postgres

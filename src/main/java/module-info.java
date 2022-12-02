@@ -15,7 +15,6 @@ module com.ak.spring {
   requires spring.security.web;
   requires spring.security.crypto;
   requires org.hibernate.orm.core;
-  requires javafaker;
   requires com.fasterxml.jackson.databind;
   requires com.fasterxml.jackson.datatype.jsr310;
   requires org.apache.tomcat.embed.core;

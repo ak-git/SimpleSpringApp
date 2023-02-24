@@ -1,9 +1,9 @@
-FROM openjdk:18.0.2
+FROM openjdk:19-jdk-slim
 
 # Create a new app directory for my application files
 RUN mkdir /app
 
-ENV JAR_TO_COPY=SimpleSpringApp-2022.12.02.jar
+ENV JAR_TO_COPY=SimpleSpringApp-2023.02.24.jar
 # Copy the app files from host machine to image filesystem
 COPY build/libs/${JAR_TO_COPY} /app
 

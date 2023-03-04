@@ -3,12 +3,12 @@ plugins {
     id 'java'
     id 'java-library'
     id 'idea'
-    id "org.sonarqube" version '3.4.0.2513'
+    id "org.sonarqube" version '3.5.0.2730'
     id 'jacoco'
     id "application"
-    id "com.github.spotbugs" version '5.0.10'
-    id 'org.springframework.boot' version '2.7.3'
-    id 'io.spring.dependency-management' version '1.0.13.RELEASE'
+    id "com.github.spotbugs" version '5.0.13'
+    id 'org.springframework.boot' version '2.7.5'
+    id 'io.spring.dependency-management' version '1.1.0'
 }
 
 spotbugs {
@@ -23,7 +23,7 @@ spotbugsMain {
     }
 }
 
-sonarqube {
+sonar {
     properties {
         property "sonar.projectKey", "ak-git_SimpleSpringApp"
         property "sonar.organization", "ak-git"
@@ -38,7 +38,7 @@ jacoco {
 }
 
 ext {
-    javaVersion = JavaVersion.VERSION_18
+    javaVersion = JavaVersion.VERSION_19
     h2 = 'com.h2database:h2:2.1.214'
     postgres = 'org.postgresql:postgresql:42.5.0'
     faker = 'com.github.javafaker:javafaker:1.0.2'
@@ -46,13 +46,13 @@ ext {
 
 wrapper {
     description 'Setup the Gradle wrapper'
-    gradleVersion = "7.5.1"
+    gradleVersion = "8.0.2"
     distributionUrl = "https://services.gradle.org/distributions/gradle-${gradleVersion}-all.zip"
 }
 
 allprojects {
     group = 'com.ak'
-    version = '2022.09.03'
+    version = '2023.03.04'
     apply plugin: 'idea'
 
     apply plugin: 'java'
@@ -73,7 +73,7 @@ allprojects {
 
     jacocoTestReport {
         reports {
-            xml.enabled true
+            xml.required = true
         }
     }
 
@@ -104,7 +104,7 @@ allprojects {
 }
 
 configurations {
-    all {
+    configureEach {
         exclude group: 'com.vaadin.external.google', module: 'android-json'
     }
     developmentOnly

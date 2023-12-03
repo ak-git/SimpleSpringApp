@@ -40,6 +40,6 @@ jobs:
       - name: Build and tag the Docker image
         run: |
           COMMIT_SHA=$(echo $GITHUB_SHA | cut -c1-7)
-          docker build -t a002k/simple-spring-app:$COMMIT_SHA .
+          docker build -t a002k/simple-spring-app:$COMMIT_SHA -t a002k/simple-spring-app:latest .
       - name: Push the Docker image
         run: docker push a002k/simple-spring-app --all-tags

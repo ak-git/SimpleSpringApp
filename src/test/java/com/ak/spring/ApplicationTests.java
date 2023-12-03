@@ -1,19 +1,14 @@
 package com.ak.spring;
 
-import org.junit.jupiter.api.Assertions;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest(classes = Application.class)
+@SpringBootTest
 class ApplicationTests {
   @Test
   void testMain() {
-    try {
-      Application.main(new String[] {});
-    }
-    catch (Exception ex) {
-      Assertions.fail(ex);
-    }
+    Assertions.assertThatNoException().isThrownBy(() -> Application.main(new String[] {}));
   }
 }
 

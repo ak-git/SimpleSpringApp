@@ -1,83 +1,16 @@
 version: "3.9"
 services:
-  db:
-    container_name: db
-    image: postgres:14.5
-    environment:
-      POSTGRES_DB: "db"
-      POSTGRES_USER: ${POSTGRES_USER:-admin}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-maddog}
-      PGDATA: "/var/lib/postgresql/data/pgdata"
-    volumes:
-      - ./data:/var/lib/postgresql/data
-    networks:
-      - db-net
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U admin -d db" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 10s
-    restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          cpus: '1'
-          memory: 4G
-
-  pgadmin:
-    container_name: pgadmin
-    image: dpage/pgadmin4
-    environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin4@pgadmin.org}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-maddog}
-      PGADMIN_CONFIG_SERVER_MODE: 'False'
-    volumes:
-      - ./data/pgadmin:/var/lib/pgadmin
-    ports:
-      - ${PGADMIN_PORT:-5050}:80
-    depends_on:
-      - db
-    networks:
-      - db-net
-    restart: unless-stopped
-
-  adminer:
-    image: adminer
-    restart: unless-stopped
-    depends_on:
-      - db
-    ports:
-      - "5051:8080"
-    networks:
-      - db-net
-
-  elephants:
-    container_name: elephants
-    image: a002k/elephants
-    ports:
-      - "80:80"
-    depends_on:
-      - simple-spring-app
-    networks:
-      - db-net
-    restart: on-failure
-
   simple-spring-app:
     container_name: simple-spring-app
     image: a002k/simple-spring-app
+    build:
+      context: .
     ports:
       - "8080:8080"
-    depends_on:
-      - db
     networks:
       - db-net
     restart: on-failure
     environment:
-      - WAIT_HOSTS=db:5432, pgadmin:80, adminer:8080, elephants:80
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/db
-      - SPRING_DATASOURCE_USERNAME=admin
-      - SPRING_DATASOURCE_PASSWORD=maddog
       - SPRING_PROFILES_ACTIVE=production
 
 networks:

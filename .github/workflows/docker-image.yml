@@ -2,9 +2,9 @@ name: Docker Image CI
 
 on:
   push:
-    branches: [ "develop" ]
+    branches: [ "master" ]
   pull_request:
-    branches: [ "develop" ]
+    branches: [ "master" ]
 
 jobs:
   build:
@@ -40,6 +40,6 @@ jobs:
       - name: Build and tag the Docker image
         run: |
           COMMIT_SHA=$(echo $GITHUB_SHA | cut -c1-7)
-          docker build -t a002k/simple-spring-app:develop-$COMMIT_SHA .
+          docker build -t a002k/simple-spring-app:$COMMIT_SHA .
       - name: Push the Docker image
         run: docker push a002k/simple-spring-app --all-tags

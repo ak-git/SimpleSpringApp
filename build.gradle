@@ -7,7 +7,7 @@ plugins {
     id 'idea'
     id "org.sonarqube" version '4.4.1.3373'
     id 'jacoco'
-    id "com.github.spotbugs" version '6.0.1'
+    id "com.github.spotbugs" version '6.0.2'
     id 'org.springframework.boot' version '3.2.0'
     id 'io.spring.dependency-management' version '1.1.4'
 
@@ -52,8 +52,16 @@ wrapper {
 
 allprojects {
     group = 'com.ak'
-    version = '2023.12.03'
+    version = '2023.12.06'
     apply plugin: 'idea'
+    idea {
+        module {
+            inheritOutputDirs = true
+        }
+    }
+    sourceSets {
+        main.output.resourcesDir = main.java.classesDirectory
+    }
 
     apply plugin: 'java'
     apply plugin: 'java-library'
@@ -66,9 +74,7 @@ allprojects {
     repositories {
         mavenCentral()
         mavenLocal()
-        maven {
-            url = 'https://plugins.gradle.org/m2/'
-        }
+        gradlePluginPortal()
     }
 
     jacocoTestReport {

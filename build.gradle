@@ -1,9 +1,7 @@
 import com.github.spotbugs.snom.Confidence
 
 plugins {
-    id "org.javamodularity.moduleplugin" version '1.8.12'
     id 'java'
-    id 'java-library'
     id 'idea'
     id "org.sonarqube" version '4.4.1.3373'
     id 'jacoco'
@@ -52,7 +50,7 @@ wrapper {
 
 allprojects {
     group = 'com.ak'
-    version = '2023.12.06'
+    version = '2023.12.11'
     apply plugin: 'idea'
     idea {
         module {
@@ -64,8 +62,6 @@ allprojects {
     }
 
     apply plugin: 'java'
-    apply plugin: 'java-library'
-    apply plugin: 'org.javamodularity.moduleplugin'
     apply plugin: 'jacoco'
 
     sourceCompatibility = javaVersion
@@ -84,11 +80,10 @@ allprojects {
     }
 
     dependencies {
-        implementation 'org.springframework.boot:spring-boot-starter'
         implementation 'org.springframework.boot:spring-boot-starter-web'
-        implementation 'org.yaml:snakeyaml:2.2'
-        testImplementation 'org.springframework.boot:spring-boot-starter-test'
-        testImplementation 'org.assertj:assertj-core:3.24.2'
+        implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+        testImplementation('org.springframework.boot:spring-boot-starter-test')
+        runtimeOnly 'com.h2database:h2'
     }
 
     test {

@@ -5,8 +5,8 @@ plugins {
     id 'idea'
     id "org.sonarqube" version '4.4.1.3373'
     id 'jacoco'
-    id "com.github.spotbugs" version '6.0.2'
-    id 'org.springframework.boot' version '3.2.0'
+    id "com.github.spotbugs" version '6.0.4'
+    id 'org.springframework.boot' version '3.2.1'
     id 'io.spring.dependency-management' version '1.1.4'
 
     id 'com.github.ben-manes.versions' version '0.50.0'
@@ -50,7 +50,7 @@ wrapper {
 
 allprojects {
     group = 'com.ak'
-    version = '2023.12.11'
+    version = '2023.12.21'
     apply plugin: 'idea'
     idea {
         module {
@@ -82,6 +82,7 @@ allprojects {
     dependencies {
         implementation 'org.springframework.boot:spring-boot-starter-web'
         implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+        developmentOnly 'org.springframework.boot:spring-boot-devtools'
         testImplementation('org.springframework.boot:spring-boot-starter-test')
         runtimeOnly 'com.h2database:h2'
     }
@@ -99,5 +100,9 @@ allprojects {
 configurations {
     configureEach {
         exclude group: 'com.vaadin.external.google', module: 'android-json'
+    }
+    developmentOnly
+    runtimeClasspath {
+        extendsFrom developmentOnly
     }
 }

@@ -38,63 +38,51 @@ jacoco {
     toolVersion = "0.8.9"
 }
 
-ext {
-    javaVersion = JavaVersion.VERSION_20
-}
-
 wrapper {
     description 'Setup the Gradle wrapper'
     gradleVersion = "8.5"
     distributionUrl = "https://services.gradle.org/distributions/gradle-${gradleVersion}-all.zip"
 }
 
-allprojects {
-    group = 'com.ak'
-    version = '2023.12.21'
-    apply plugin: 'idea'
-    idea {
-        module {
-            inheritOutputDirs = true
-        }
+group = 'com.ak'
+version = '2023.12.29'
+apply plugin: 'idea'
+idea {
+    module {
+        inheritOutputDirs = true
     }
-    sourceSets {
-        main.output.resourcesDir = main.java.classesDirectory
+}
+sourceSets {
+    main.output.resourcesDir = main.java.classesDirectory
+}
+
+apply plugin: 'java'
+apply plugin: 'jacoco'
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+    gradlePluginPortal()
+}
+
+jacocoTestReport {
+    reports {
+        xml.required = true
     }
+}
 
-    apply plugin: 'java'
-    apply plugin: 'jacoco'
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    testImplementation('org.springframework.boot:spring-boot-starter-test')
+}
 
-    sourceCompatibility = javaVersion
-    targetCompatibility = javaVersion
-
-    repositories {
-        mavenCentral()
-        mavenLocal()
-        gradlePluginPortal()
+test {
+    useJUnitPlatform()
+    testLogging {
+        events "passed", "skipped", "failed"
     }
-
-    jacocoTestReport {
-        reports {
-            xml.required = true
-        }
-    }
-
-    dependencies {
-        implementation 'org.springframework.boot:spring-boot-starter-web'
-        implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-        developmentOnly 'org.springframework.boot:spring-boot-devtools'
-        testImplementation('org.springframework.boot:spring-boot-starter-test')
-        runtimeOnly 'com.h2database:h2'
-    }
-
-    test {
-        useJUnitPlatform()
-        testLogging {
-            events "passed", "skipped", "failed"
-        }
-        forkEvery = 5
-        maxHeapSize = '1G'
-    }
+    forkEvery = 5
+    maxHeapSize = '1G'
 }
 
 configurations {
